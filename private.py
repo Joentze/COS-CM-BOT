@@ -1,0 +1,4 @@
+import os
+
+TELEGRAM_TOKEN = os.environ["API_TELEGRAM_TOKEN"]
+HEROKU_URI = os.environ["HEROKU_POSTGRES_CREDENTIALS"]
