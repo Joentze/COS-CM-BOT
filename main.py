@@ -8,10 +8,7 @@ import logging
 from msg import message_text, inline_options
 from private import TELEGRAM_TOKEN
 from random_verse import get_random_verse
-import os
-
-API_TELE_TOKEN = os.environ['API_TELE']
-HEROKU_POSTGRES = os.environ['POSTGRES_URI']
+from private import TELEGRAM_TOKEN
 
 DATE_TODAY = datetime.today().strftime("%d%m%Y")
 DATE_TODAY_SLASHED = datetime.today().strftime("%d/%m/%Y")
@@ -153,7 +150,7 @@ def advance_help_msg(update, context):
     update.message.reply_text(message_text["help_advance"])
 
 def run():
-    updater = Updater(API_TELE_TOKEN)
+    updater = Updater(TELEGRAM_TOKEN)
     dp = updater.dispatcher
     dp.add_handler(CommandHandler('start',start_msg))
     dp.add_handler(CommandHandler('help',help_msg))
