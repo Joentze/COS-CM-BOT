@@ -141,7 +141,7 @@ def add_kid_into_attd(update, context):
             kid_class = session_code[2:4]
             DATE_TODAY,DATE_TODAY_SLASHED = give_sun_date_if_not_sun(GET_DAY_OF_WEEK)
             insert_new_kid({"name":name.strip(),"session_code":session_code,"age":00,"session":session,"class":kid_class})
-            attd_insert_new_kid(name, session_code + DATE_TODAY)            
+            attd_insert_new_kid(name.strip(), session_code + DATE_TODAY)            
             update.message.reply_text(message_text["added_kid_success"] + message_text[session] + " " + kid_class)
     else:
         update.message.reply_text(message_text["addkid_error"])
