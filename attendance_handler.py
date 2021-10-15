@@ -10,7 +10,7 @@ def create_inline_obj(mapped_val):
     emoji_list = {0:'Absent ❌',1:' Church ⛪️',2:'Zoom 👩🏻‍💻'}
     inline_array = []
     for key, value in mapped_val.items():
-        inline_array.append([{'callback_data':f'attd_{key}', 'text':f'{key} | {emoji_list[value]}'}])
+        inline_array.append([{'callback_data':f'attd_{key.strip()}', 'text':f'{key} | {emoji_list[value]}'}])
     inline_array.append([{'callback_data':'submit_attd', 'text':'Submit'}])
     return {'inline_keyboard':inline_array}
 
@@ -25,7 +25,7 @@ def update_name_mapped_val(data, mapped_val):
 def init_name_mapped_val(class_id):
     return_dict = {}
     for name in get_all_names_for_class(class_id):
-        return_dict[name] = 0
+        return_dict[name.strip()] = 0
     return return_dict
 
 
