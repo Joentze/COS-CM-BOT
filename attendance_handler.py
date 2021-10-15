@@ -51,9 +51,9 @@ c = conn.cursor()
 #           admin boolean)
 #""")
 #
-#def delete_entire_table(table_name):
-#    with conn:
-#        c.execute(f"DROP TABLE {table_name}")
+def delete_entire_table(table_name):
+    with conn:
+        c.execute(f"DROP TABLE {table_name}")
 #
 #delete_entire_table("all_kids")
 #c.execute("""CREATE TABLE all_kids (
@@ -241,23 +241,25 @@ def convert_fetchall_array(array):
 #conn.commit()
 #conn.close()
 #print(get_user_session_code("111111"))
-#
-#def create_array_of_user_obj(csvname):
-#    return_list = []
-#    with open(csvname, 'r') as csvfile:
-#        reader = csv.reader(csvfile, delimiter="\t")
-#        for line in reader:
-#            line = line[0].split(',')
-#            print(line)
-#            this_obj = {"name":line[3],"session_code":line[0]+line[1]+line[2],"age":00,"session":line[0]+line[1],"class":line[2]}
-#            return_list.append(this_obj)
-#    return return_list
-#
-#def add_all_kids_to_database(array):
-#    for obj in array:
-#        insert_new_kid(obj)
-#
+
+def create_array_of_user_obj(csvname):
+    return_list = []
+    with open(csvname, 'r') as csvfile:
+        reader = csv.reader(csvfile, delimiter="\t")
+        for line in reader:
+            line = line[0].split(',')
+            print(line)
+            this_obj = {"name":line[3].strip(),"session_code":line[0]+line[1]+line[2],"age":00,"session":line[0]+line[1],"class":line[2]}
+            return_list.append(this_obj)
+    return return_list
+
+def add_all_kids_to_database(array):
+    for obj in array:
+        insert_new_kid(obj)
+
 #add_all_kids_to_database(create_array_of_user_obj("CMALL.csv"))
 #
 #test_map_val = {'joen tan zhuo en':0,'chloe':1,'daniel':2,'hayley':0}
 
+if __name__ == "__main__":
+    add_all_kids_to_database(create_array_of_user_obj("CMALL.csv"))
