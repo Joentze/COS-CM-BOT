@@ -35,7 +35,7 @@ def attd_insert_new_kid(name, attd_id):
     print(obj_state)
     if obj_state != False:
         print("inserting...")
-        obj_state[name] = 1
+        obj_state[name.strip()] = 1
         add_in_new_attd(attd_id, str(obj_state))
 
 conn = sql.connect(HEROKU_URI, sslmode='require')
