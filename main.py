@@ -123,8 +123,11 @@ def getverse(update, context):
 
 def give_sun_date_if_not_sun(day_of_week):
     if day_of_week != 6:
+        print("it's not sunday")
+        print(day_of_week)
         return GET_PREV_SUN_DATE, GET_PREV_SUN_DATE_SLASHED
     else:
+        print("it's sunday")
         return DATE_TODAY, DATE_TODAY_SLASHED
 
 def add_kid_into_attd(update, context):
