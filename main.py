@@ -11,7 +11,7 @@ from random_verse import get_random_verse
 from private import TELEGRAM_TOKEN
 
 
-DATE_TODAY_W_MIN_S = datetime.time()
+DATE_TODAY_W_MIN_S = datetime.today().strftime("%d%m%Y-%H:%M:%S")
 DATE_TODAY = datetime.today().strftime("%d%m%Y")
 DATE_TODAY_SLASHED = datetime.today().strftime("%d/%m/%Y")
 #IS ZERO INDEX I.E MONDAY == 0, SUNDAY== 6
