@@ -10,6 +10,8 @@ from private import TELEGRAM_TOKEN
 from random_verse import get_random_verse
 from private import TELEGRAM_TOKEN
 
+
+DATE_TODAY_W_MIN_S = datetime.datetime.now()
 DATE_TODAY = datetime.today().strftime("%d%m%Y")
 DATE_TODAY_SLASHED = datetime.today().strftime("%d/%m/%Y")
 #IS ZERO INDEX I.E MONDAY == 0, SUNDAY== 6
@@ -121,6 +123,10 @@ def getverse(update, context):
     bible_verse = get_random_verse()
     update.message.reply_text(bible_verse)
 
+def get_time_test(update, context):
+    update.message.reply_text(DATE_TODAY_W_MIN_S)
+
+
 def give_sun_date_if_not_sun(day_of_week):
     if day_of_week != 6:
         print("it's not sunday")
@@ -156,6 +162,7 @@ def run():
     updater = Updater(TELEGRAM_TOKEN)
     dp = updater.dispatcher
     dp.add_handler(CommandHandler('start',start_msg))
+    dp.add_handler(CommandHandler('timetest',get_time_test))
     dp.add_handler(CommandHandler('help',help_msg))
     dp.add_handler(CommandHandler('advancehelp',advance_help_msg))
     dp.add_handler(CommandHandler('setclass',update_profile))
