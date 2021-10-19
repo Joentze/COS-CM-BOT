@@ -1,4 +1,5 @@
 #import sqlite3 as sql
+from datetime import date, timedelta
 import json 
 import ast
 import psycopg2 as sql
@@ -219,28 +220,19 @@ def insert_full_user_data(obj):
         )
         """,
         obj
-        )  
-#insert_full_user_data({"name":"test", "chat_id":"000000", "session":"fpp7", "class":"p7"})  
-#create_attendance_table('lol')
-#delete_entire_table("users")
-#delete_entire_table("helloWorld")
-#delete_entire_table("newtable")
-#delete_values("all_attd","attd_id","FPP407102021")
+        )
+
+def get_attd_with_substring(sub_string):
+    c.execute("""
+        SELECT * FROM all_attd WHERE attd_id LIKE %(sub_string)s
+    """,
+    {"sub_string":f'{sub_string}'}
+    )
+    #PUTS ALL ATTENDANCE OBJ IN ARRAY
+    return [ast.literal_eval(i[1]) for i in c.fetchall()]
+
 def convert_fetchall_array(array):
     return [i[0] for i in array]
-#add_in_new_attd("FPP407102021",'{"JOEN":1}')
-#add_in_new_attd("FPP407102021",'{"mary":3,"daniel":1}')
-#get_attd_obj_by_id("FPP407102021")
-#add_in_new_attd("FPP407102021",'{"mary":1}')
-#insert_new_kid({"name":"Daniel","session_code":"FPP4","age":12,"session":"FP","class":"P6"})
-#insert_new_kid({"name":"John","session_code":"FPP4","age":12,"session":"FP","class":"P6"})
-#insert_new_kid({"name":"Ian","session_code":"FPP4","age":12,"session":"FP","class":"P6"})
-#insert_new_kid({"name":"Ron","session_code":"FPP4","age":12,"session":"FP","class":"P6"})
-#print(get_all_names_for_class("FPP6"))
-#insert_full_user_data({"name":"Joen Tan", "chat_id":"111111","session":"FP","class":"P5"})
-#conn.commit()
-#conn.close()
-#print(get_user_session_code("111111"))
 
 def create_array_of_user_obj(csvname):
     return_list = []
@@ -253,14 +245,91 @@ def create_array_of_user_obj(csvname):
             return_list.append(this_obj)
     return return_list
 
+
+def count_total_in_attd_substr(array_attendance):
+    count = 0
+    for this_dict in array_attendance:
+        all_values = list(this_dict.values())
+        for value in all_values:
+            if value > 0:
+                count+=1
+            else:
+                pass
+    return count
+
 def add_all_kids_to_database(array):
     for obj in array:
         insert_new_kid(obj)
 
-#add_all_kids_to_database(create_array_of_user_obj("CMALL.csv"))
-#
-#test_map_val = {'joen tan zhuo en':0,'chloe':1,'daniel':2,'hayley':0}
+def get_attd_count(input_string):
+    if len(input_string) == 12:
+        all_attd = get_attd_with_substring(input_string)
+        get_total_number_for_session = count_total_in_attd_substr(all_attd)
+        return get_total_number_for_session
+    else:
+        return False
+
+def allsundays(year):
+    year = int(year)
+    d = date(year, 1, 1)                    # January 1st
+    d += timedelta(days = 6 - d.weekday())  # First Sunday
+    while d.year == year:
+        yield d
+        d += timedelta(days = 7)
+
+def all_sunday_object(sundays):
+    return_dict = {}
+    for this_sun in sundays:
+        this_sun = this_sun.strftime("%d%m%Y")
+        get_month = this_sun[2:4]#this_sun.split("/")[1]
+        if get_month not in list(return_dict.keys()):
+            return_dict[get_month] = [this_sun]
+        else:
+            return_dict[get_month].append(this_sun)
+    return return_dict
+
+#month in numbers
+def get_attd_id_combis(month, year):
+    return_dict = {}
+    all_sun = allsundays(year)
+    all_sun_obj = all_sunday_object(all_sun)
+    get_all_weeks = all_sun_obj[month]
+    all_session = ["FJ","SJ","FP","SP"]
+    for session in all_session:
+        return_dict[session] = [f"{session}__{week}" for week in get_all_weeks]
+    return return_dict
+
+#age_group accepts P or J 
+def get_age_group_total_obj(age_group ,attd_id_date_obj):
+    if age_group == "P" or age_group == "J":
+        return_list = []
+        s_one = F"S{age_group}"
+        f_one = F"F{age_group}"
+        sp_date = attd_id_date_obj[s_one]
+        fp_date = attd_id_date_obj[f_one]
+        len_of_date = len(fp_date)
+        #counts for five weeks
+        for week in range(0,5):
+            if week < len_of_date:
+                sum_sp = get_attd_count(sp_date[week])
+                sum_fp = get_attd_count(fp_date[week])
+                return_list.append({f_one:sum_fp, s_one:sum_sp})
+            else:
+                return_list.append({f_one:0, s_one:0})
+        return return_list
+    else:
+        return False
+
+def get_praise_jam_attendance_array(month, year):
+    date_obj = get_attd_id_combis(month,year)
+    jam_age_group = get_age_group_total_obj("J", date_obj)
+    praise_age_group = get_age_group_total_obj("P", date_obj)
+    return {"P":praise_age_group, "J":jam_age_group}
 
 if __name__ == "__main__":
-    add_all_kids_to_database(create_array_of_user_obj("CMALL.csv"))
+    #print(get_attd_count_month("FP","102021"))
+    date_obj = get_attd_id_combis("10","2021")
+    print(get_age_group_total_obj("P", date_obj))
+    #print(all_sunday_object(allsundays(2021)))
+    #add_all_kids_to_database(create_array_of_user_obj("CMALL.csv"))
     #delete_entire_table("all_kids")

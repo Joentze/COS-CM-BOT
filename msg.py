@@ -8,6 +8,7 @@ message_text = {
     "select_class":"Please select the class that you're teaching 🍎.",
     "select_session":"Please select the session that you're in 👨🏻‍🏫. ",
     "select_complete":"Session & class profile update complete! 🤩",
+    "collate_loading":"Collating attendance...This will take a minute! ⏳",
     "FP":"1st Praise",
     "FJ":"1st Jam",
     "SP":"2nd Praise",
@@ -15,25 +16,26 @@ message_text = {
     "generic_error_msg":"Sorry something went wrong there! Do try again. If the problem persists contact Joen",
     "addkid_error":"/addkid command formatting is off. Please try again.",
     "added_kid_success":"🎉 Sucessfully added kid into ",
+    "date_format_error":"The date format that you have entered is incorrect. Ensure that the date is in MM/YYYY format 📆",
     "help_message":"""
     List of Commands:
 
-    Misc. Stuff:
-    /start - Initiates the start of bot ⚙️
-    /setclass - Change your session & class in your profile ✍🏼
-    
-    Work Stuff:
-    /attendance - Sends the attendance for the class of session stated in your profile 📋
+Misc. Stuff:
+/start - Initiates the start of bot ⚙️
+/setclass - Change your session & class in your profile ✍🏼
 
-    🤔Change to other classes (via /setclass) to change their attendance
+Work Stuff:
+/attendance - Sends the attendance for the class of session stated in your profile 📋
+/collate MM/YYYY - Collates attendance for the week and sends an excel file.
 
-    Fun Stuff:
-    /verse - Sends you a random Bible verse 📙
-    /ilovejesus - 💕
+🤔Change to other classes (via /setclass) to change their attendance
 
-    Even more fun stuff:
-    /advancehelp - help option, but cooler.
+Fun Stuff:
+/verse - Sends you a random Bible verse 📙
+/ilovejesus - 💕
 
+Even more fun stuff:
+/advancehelp - help option, but cooler.
     """,
     "help_advance":"""
     This is where it gets a little cool, but crazy.
@@ -50,10 +52,6 @@ message_text = {
 
     Profile code
     "1st Praise Primary 4" = FPP4
-
-    /collateweek PROFILE-CODE - Collates attendance for the week and sends an excel file.
-    /collatemonth PROFILE-CODE - Collates attendance for the month and sends an excel file.
-    /collateyear PROFILE-CODE - Collates attendance for the year and sends an excel file.
 
     /addkid NAME-OF-KID/PROFILE-CODE - Add kid into your class for administrative purposes.
     """
@@ -80,4 +78,19 @@ inline_options={
         {"callback_data":"submit_user_class_data_P2","text":"P2"}],
         [{"callback_data":"submit_user_class_data_N1","text":"N1"}]
     ]}
+}
+
+month_number_map = {
+    "01":"Jan",
+    "02":"Feb",
+    "03":"Mar",
+    "04":"Apr",
+    "05":"May",
+    "06":"Jun",
+    "07":"Jul",
+    "08":"Aug",
+    "09":"Sep",
+    "10":"Oct",    
+    "11":"Nov",
+    "12":"Dec"
 }

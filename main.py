@@ -1,24 +1,18 @@
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackQueryHandler
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton
-from attendance_handler import create_inline_obj, init_name_mapped_val, update_name_mapped_val, attd_insert_new_kid,add_in_new_attd, get_attd_obj_by_id, inside_bool_db,startup_user,get_user_readable_data,insert_class_user, insert_session_user,insert_session_id_user,get_user_session_code, insert_new_kid
+from attendance_handler import create_inline_obj, init_name_mapped_val, update_name_mapped_val, attd_insert_new_kid,add_in_new_attd, get_attd_obj_by_id, inside_bool_db,startup_user,get_user_readable_data,insert_class_user, insert_session_user,insert_session_id_user,get_user_session_code, insert_new_kid, get_praise_jam_attendance_array
+from excel_auto import init_workbook
  #attd_change_inline_button
 import time
 from datetime import datetime, timedelta
 import logging
-from msg import message_text, inline_options
+from msg import message_text, inline_options, month_number_map
 from private import TELEGRAM_TOKEN
 from random_verse import get_random_verse
 from private import TELEGRAM_TOKEN
+import os
 
 
-
-DATE_TODAY = datetime.today().strftime("%d%m%Y")
-DATE_TODAY_SLASHED = datetime.today().strftime("%d/%m/%Y")
-#IS ZERO INDEX I.E MONDAY == 0, SUNDAY== 6
-GET_DAY_OF_WEEK = datetime.today().weekday()
-GET_DATE_OF_PREV_SUN_RAW = datetime.today()-timedelta(days=GET_DAY_OF_WEEK+1)
-GET_PREV_SUN_DATE = GET_DATE_OF_PREV_SUN_RAW.strftime("%d%m%Y")
-GET_PREV_SUN_DATE_SLASHED = GET_DATE_OF_PREV_SUN_RAW.strftime("%d/%m/%Y")
 
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -40,7 +34,7 @@ def start_msg(update, context):
 def attd_date_msg(update, context):
     get_chat_id = update.message.from_user["id"]
     update.message.reply_text(message_text["attendance_pending"])
-    DATE_TODAY,DATE_TODAY_SLASHED = give_sun_date_if_not_sun(GET_DAY_OF_WEEK)
+    DATE_TODAY,DATE_TODAY_SLASHED = give_sun_date_if_not_sun()
     reply_markup={}
     user_session = get_user_session_code(str(get_chat_id))
     is_available = get_attd_obj_by_id(user_session + DATE_TODAY)
@@ -56,7 +50,7 @@ def attd_date_msg(update, context):
 def update_attd(update, context):
     query = update.callback_query
     get_chat_id = update.callback_query.message.chat.id
-    DATE_TODAY,DATE_TODAY_SLASHED = give_sun_date_if_not_sun(GET_DAY_OF_WEEK)
+    DATE_TODAY,DATE_TODAY_SLASHED = give_sun_date_if_not_sun()
     user_session = get_user_session_code(str(get_chat_id))
     obj = get_attd_obj_by_id(user_session+DATE_TODAY)
     button_pressed =  query.data.strip()
@@ -69,7 +63,7 @@ def update_attd(update, context):
 def submit_attd(update, context):
     get_chat_id = update.callback_query.message.chat.id
     user_session = get_user_session_code(str(get_chat_id))
-    DATE_TODAY,DATE_TODAY_SLASHED = give_sun_date_if_not_sun(GET_DAY_OF_WEEK)
+    DATE_TODAY,DATE_TODAY_SLASHED = give_sun_date_if_not_sun()
     attd_id = user_session+DATE_TODAY
     query = update.callback_query
     mapped_val = get_attd_obj_by_id(attd_id)
@@ -80,7 +74,7 @@ def submit_attd(update, context):
 def change_attd(update, context):
     get_chat_id = update.callback_query.message.chat.id
     user_session = get_user_session_code(str(get_chat_id))
-    DATE_TODAY,DATE_TODAY_SLASHED = give_sun_date_if_not_sun(GET_DAY_OF_WEEK)
+    DATE_TODAY,DATE_TODAY_SLASHED = give_sun_date_if_not_sun()
     attd_id = user_session+DATE_TODAY
     query = update.callback_query
     obj = get_attd_obj_by_id(attd_id)
@@ -128,13 +122,16 @@ def get_time_test(update, context):
     update.message.reply_text(DATE_TODAY_W_MIN_S)
 
 
-def give_sun_date_if_not_sun(day_of_week):
-    if day_of_week != 6:
-        print("it's not sunday")
-        print(day_of_week)
+def give_sun_date_if_not_sun():
+    DATE_TODAY = datetime.today().strftime("%d%m%Y")
+    DATE_TODAY_SLASHED = datetime.today().strftime("%d/%m/%Y")
+    GET_DAY_OF_WEEK = datetime.today().weekday()
+    GET_DATE_OF_PREV_SUN_RAW = datetime.today()-timedelta(days=GET_DAY_OF_WEEK+1)
+    GET_PREV_SUN_DATE = GET_DATE_OF_PREV_SUN_RAW.strftime("%d%m%Y")
+    GET_PREV_SUN_DATE_SLASHED = GET_DATE_OF_PREV_SUN_RAW.strftime("%d/%m/%Y")
+    if GET_DAY_OF_WEEK != 6:
         return GET_PREV_SUN_DATE, GET_PREV_SUN_DATE_SLASHED
     else:
-        print("it's sunday")
         return DATE_TODAY, DATE_TODAY_SLASHED
 
 def add_kid_into_attd(update, context):
@@ -149,7 +146,7 @@ def add_kid_into_attd(update, context):
         elif len(session_code) == 4:
             session = session_code[0:2]
             kid_class = session_code[2:4]
-            DATE_TODAY,DATE_TODAY_SLASHED = give_sun_date_if_not_sun(GET_DAY_OF_WEEK)
+            DATE_TODAY,DATE_TODAY_SLASHED = give_sun_date_if_not_sun()
             insert_new_kid({"name":name.strip(),"session_code":session_code,"age":00,"session":session,"class":kid_class})
             attd_insert_new_kid(name.strip(), session_code + DATE_TODAY)            
             update.message.reply_text(message_text["added_kid_success"] + message_text[session] + " " + kid_class)
@@ -158,6 +155,27 @@ def add_kid_into_attd(update, context):
 
 def advance_help_msg(update, context):
     update.message.reply_text(message_text["help_advance"])
+
+def collate_attendance_month(update, context):
+    chat_id = update.message.from_user["id"]
+    message = update.message.text.strip()
+    date_input = message.replace("/collate","").strip()
+    month_year = date_input.split("/")
+    if len(month_year) == 2 :
+        month = month_year[0]
+        year = month_year[1]
+        if len(month) == 2 and len(year) == 4:
+            update.message.reply_text(message_text["collate_loading"])
+            get_array_sessions = get_praise_jam_attendance_array(month, year)
+            filename = f"collate_{month}{year}"
+            init_workbook(filename,month_number_map[month],get_array_sessions)
+            with open(f"{filename}.xlsx", "rb") as excel_collate:
+                context.bot.send_document(chat_id = chat_id, document=excel_collate, filename=filename+".xlsx")
+            os.remove(f"./{filename}.xlsx")
+        else:
+            update.message.reply_text(message_text["date_format_error"]) 
+    else:
+        update.message.reply_text(message_text["date_format_error"]) 
 
 def run():
     updater = Updater(TELEGRAM_TOKEN)
@@ -170,6 +188,7 @@ def run():
     dp.add_handler(CommandHandler('attendance', attd_date_msg))
     dp.add_handler(CommandHandler('verse', getverse))
     dp.add_handler(CommandHandler('addkid', add_kid_into_attd))
+    dp.add_handler(CommandHandler('collate', collate_attendance_month))
     dp.add_handler(CallbackQueryHandler(update_attd,pattern="attd_"))
     dp.add_handler(CallbackQueryHandler(submit_attd,pattern="submit_attd"))
     dp.add_handler(CallbackQueryHandler(change_attd,pattern="change_attd"))
