@@ -38,22 +38,21 @@ Even more fun stuff:
 /advancehelp - help option, but cooler.
     """,
     "help_advance":"""
-    This is where it gets a little cool, but crazy.
+This is where it gets a little cool, but crazy.
 
-    1st - F
-    2nd - S
+1st - F
+2nd - S
+Praise - P
+Jam - J
 
-    Praise - P
-    Jam - J
+Nursery - N1
+Kindergarten - K1/2
+Primary - P1/2/3/4/5/6
 
-    Nursery - N1
-    Kindergarten - K1/2
-    Primary - P1/2/3/4/5/6
+Profile code
+"1st Praise Primary 4" = FPP4
 
-    Profile code
-    "1st Praise Primary 4" = FPP4
-
-    /addkid NAME-OF-KID/PROFILE-CODE - Add kid into your class for administrative purposes.
+/addkid NAME-OF-KID/PROFILE-CODE - Add kid into your class for administrative purposes.
     """
 
 }
@@ -72,11 +71,12 @@ inline_options={
         {"callback_data":"submit_user_class_data_P6","text":"P6"}]
     ]},
     "J_class_option":{"inline_keyboard":[
-        [{"callback_data":"submit_user_class_data_K2","text":"K2"},
-        {"callback_data":"submit_user_class_data_K1","text":"K1"}],
         [{"callback_data":"submit_user_class_data_P1","text":"P1"},
         {"callback_data":"submit_user_class_data_P2","text":"P2"}],
-        [{"callback_data":"submit_user_class_data_N1","text":"N1"}]
+        [{"callback_data":"submit_user_class_data_K2","text":"K2"},
+        {"callback_data":"submit_user_class_data_K1","text":"K1"}],
+        [{"callback_data":"submit_user_class_data_N1","text":"N1"}],
+        [{"callback_data":"submit_user_class_data_N0","text":"Pre-N"}]
     ]}
 }
 

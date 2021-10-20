@@ -328,8 +328,12 @@ def get_praise_jam_attendance_array(month, year):
 
 if __name__ == "__main__":
     #print(get_attd_count_month("FP","102021"))
-    date_obj = get_attd_id_combis("10","2021")
-    print(get_age_group_total_obj("P", date_obj))
+    #date_obj = get_attd_id_combis("10","2021")
+    #print(get_age_group_total_obj("P", date_obj))
     #print(all_sunday_object(allsundays(2021)))
     #add_all_kids_to_database(create_array_of_user_obj("CMALL.csv"))
     #delete_entire_table("all_kids")
+    
+    with conn:
+        c.execute("UPDATE all_kids SET session")
+    
