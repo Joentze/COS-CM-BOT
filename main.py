@@ -96,6 +96,14 @@ def J_submit_user_session_data(update, context):
     insert_session_user(str(get_chat_id), session)
     context.bot.edit_message_text(chat_id=get_chat_id, message_id=message_id, text=message_text['select_class'], reply_markup=inline_options["J_class_option"])
 
+def T_submit_user_session_data(update, context):
+    get_chat_id = update.callback_query.message.chat.id
+    message_id = update.callback_query.message.message_id
+    session = update.callback_query.data.replace("submit_user_session_data_T_", "")
+    insert_session_user(str(get_chat_id), session)
+    context.bot.edit_message_text(chat_id=get_chat_id, message_id=message_id, text=message_text['select_class'], reply_markup=inline_options["T_class_option"])
+
+
 def submit_user_class_data(update, context):
     get_chat_id = update.callback_query.message.chat.id
     message_id = update.callback_query.message.message_id
@@ -200,6 +208,7 @@ def run():
     dp.add_handler(CallbackQueryHandler(change_attd,pattern="change_attd"))
     dp.add_handler(CallbackQueryHandler(P_submit_user_session_data,pattern="submit_user_session_data_P"))
     dp.add_handler(CallbackQueryHandler(J_submit_user_session_data,pattern="submit_user_session_data_J"))
+    dp.add_handler(CallbackQueryHandler(T_submit_user_session_data,pattern="submit_user_session_data_T"))
     dp.add_handler(CallbackQueryHandler(submit_user_class_data,pattern="submit_user_class_data_"))
     updater.start_polling()
     updater.idle()

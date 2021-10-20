@@ -79,10 +79,14 @@ inline_options={
         {"callback_data":"submit_user_class_data_P2","text":"P2"}],
         [{"callback_data":"submit_user_class_data_K2","text":"K2"},
         {"callback_data":"submit_user_class_data_K1","text":"K1"}],
-        [{"callback_data":"submit_user_class_data_N1","text":"N1"}],
+        [{"callback_data":"submit_user_class_data_N1","text":"N1"}]
+    ]},
+    "T_class_option":{"inline_keyboard":[
         [{"callback_data":"submit_user_class_data_N0","text":"Pre-N"}]
-    ]}
-}
+    ]
+    }
+    }
+
 
 month_number_map = {
     "01":"Jan",
