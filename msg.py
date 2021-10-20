@@ -11,8 +11,10 @@ message_text = {
     "collate_loading":"Collating attendance...This will take a minute! ⏳",
     "FP":"1st Praise",
     "FJ":"1st Jam",
+    'FT':"1st Praise-Tots",
     "SP":"2nd Praise",
     "SJ":"2nd Jam",
+    "ST":"2nd Praise-Tots",
     "generic_error_msg":"Sorry something went wrong there! Do try again. If the problem persists contact Joen",
     "addkid_error":"/addkid command formatting is off. Please try again.",
     "added_kid_success":"🎉 Sucessfully added kid into ",
@@ -61,8 +63,10 @@ inline_options={
     "session_option":{"inline_keyboard":[
         [{"callback_data":"submit_user_session_data_P_FP","text":message_text["FP"]}],
         [{"callback_data":"submit_user_session_data_J_FJ","text":message_text["FJ"]}],
+        [{"callback_data":"submit_user_session_data_T_FT","text":message_text["FT"]}],
         [{"callback_data":"submit_user_session_data_P_SP","text":message_text["SP"]}],
-        [{"callback_data":"submit_user_session_data_J_SJ","text":message_text["SJ"]}]
+        [{"callback_data":"submit_user_session_data_J_SJ","text":message_text["SJ"]}],
+        [{"callback_data":"submit_user_session_data_T_ST","text":message_text["ST"]}]
     ]},
     "P_class_option":{"inline_keyboard":[
         [{"callback_data":"submit_user_class_data_P3","text":"P3"},

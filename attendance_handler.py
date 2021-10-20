@@ -294,14 +294,14 @@ def get_attd_id_combis(month, year):
     all_sun = allsundays(year)
     all_sun_obj = all_sunday_object(all_sun)
     get_all_weeks = all_sun_obj[month]
-    all_session = ["FJ","SJ","FP","SP"]
+    all_session = ["FJ","SJ","FT","FP","SP","ST"]
     for session in all_session:
         return_dict[session] = [f"{session}__{week}" for week in get_all_weeks]
     return return_dict
 
 #age_group accepts P or J 
 def get_age_group_total_obj(age_group ,attd_id_date_obj):
-    if age_group == "P" or age_group == "J":
+    if age_group == "P" or age_group == "J" or age_group == "T":
         return_list = []
         s_one = F"S{age_group}"
         f_one = F"F{age_group}"
@@ -324,7 +324,8 @@ def get_praise_jam_attendance_array(month, year):
     date_obj = get_attd_id_combis(month,year)
     jam_age_group = get_age_group_total_obj("J", date_obj)
     praise_age_group = get_age_group_total_obj("P", date_obj)
-    return {"P":praise_age_group, "J":jam_age_group}
+    tots_age_group = get_age_group_total_obj("T", date_obj)
+    return {"P":praise_age_group, "J":jam_age_group, "T":tots_age_group}
 
 if __name__ == "__main__":
     #print(get_attd_count_month("FP","102021"))
@@ -333,7 +334,9 @@ if __name__ == "__main__":
     #print(all_sunday_object(allsundays(2021)))
     #add_all_kids_to_database(create_array_of_user_obj("CMALL.csv"))
     #delete_entire_table("all_kids")
-    
-    with conn:
-        c.execute("UPDATE all_kids SET session")
-    
+    #print(get_praise_jam_attendance_array("10","2021"))
+    #
+    #with conn:
+    #    c.execute("UPDATE all_kids SET session")
+    #
+    pass
