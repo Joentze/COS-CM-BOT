@@ -14,9 +14,6 @@ import os
 
 
 
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-
 def start_msg(update, context):
     chat_id = update.message.from_user["id"]
     user_name = update.message.from_user["first_name"]
