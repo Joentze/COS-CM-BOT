@@ -5,7 +5,6 @@ from excel_auto import init_workbook
  #attd_change_inline_button
 import time
 from datetime import datetime, timedelta
-import logging
 from msg import message_text, inline_options, month_number_map
 from private import TELEGRAM_TOKEN
 from random_verse import get_random_verse
