@@ -13,6 +13,7 @@ import os
 
 
 
+
 def start_msg(update, context):
     chat_id = update.message.from_user["id"]
     user_name = update.message.from_user["first_name"]
@@ -151,7 +152,7 @@ def add_kid_into_attd(update, context):
             session = session_code[0:2]
             kid_class = session_code[2:4]
             DATE_TODAY,DATE_TODAY_SLASHED = give_sun_date_if_not_sun()
-            insert_new_kid({"name":name.strip(),"session_code":session_code,"age":00,"session":session,"class":kid_class})
+            insert_new_kid({"name":name.strip(),"session_code":session_code,"session":session,"class":kid_class,"age":00})
             attd_insert_new_kid(name.strip(), session_code + DATE_TODAY)            
             update.message.reply_text(message_text["added_kid_success"] + message_text[session] + " " + kid_class)
     else:

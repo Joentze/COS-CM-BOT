@@ -2,11 +2,10 @@
 from datetime import date, timedelta
 import json 
 import ast
-import psycopg2 as sql
 from private import HEROKU_URI
 import csv
-
-
+import psycopg2 as sql
+import msg as message
 def create_inline_obj(mapped_val):
     emoji_list = {0:'Absent ❌',1:' Church ⛪️',2:'Zoom 👩🏻‍💻'}
     inline_array = []
@@ -40,7 +39,6 @@ def attd_insert_new_kid(name, attd_id):
         add_in_new_attd(attd_id, str(obj_state))
 
 conn = sql.connect(HEROKU_URI, sslmode='require')
-
 c = conn.cursor()
 #
 #c.execute("""CREATE TABLE users (
@@ -143,7 +141,6 @@ def insert_new_kid(obj):
         INSERT INTO all_kids VALUES (
             %(name)s,
             %(session_code)s,
-            %(age)s,
             %(session)s,
             %(class)s
         )
@@ -241,7 +238,7 @@ def create_array_of_user_obj(csvname):
         for line in reader:
             line = line[0].split(',')
             print(line)
-            this_obj = {"name":line[3].strip(),"session_code":line[0]+line[1]+line[2],"age":00,"session":line[0]+line[1],"class":line[2]}
+            this_obj = {"name":line[3].strip(),"session_code":line[0]+line[1]+line[2],"session":line[0]+line[1],"class":line[2]}
             return_list.append(this_obj)
     return return_list
 
@@ -327,7 +324,73 @@ def get_praise_jam_attendance_array(month, year):
     tots_age_group = get_age_group_total_obj("T", date_obj)
     return {"P":praise_age_group, "J":jam_age_group, "T":tots_age_group}
 
+descending_class_conversion_map = {
+    "P6":"TC",
+    "P5":"P6",
+    "P4":"P5",
+    "P3":"P4",
+    "P2":"P3",
+    "P1":"P2",
+    "K2":"P1",
+    "K1":"K2",
+    "N1":"K1",
+    "N0":"N1",
+}
+
+undo_class_conversion_map ={
+    "TC":"P6",
+    "P6":"P5",
+    "P5":"P4",
+    "P4":"P3",
+    "P3":"P2",
+    "P2":"P1",
+    "P1":"K2",
+    "K2":"K1",
+    "K1":"N1",
+    "N1":"N0",
+}
+
+def update_all_kids_classes(conversion_map, all_session_codes):
+    for class_now, class_next in conversion_map.items():
+        with conn:
+            print(f'replaced {class_now}')
+            c.execute("""
+            UPDATE all_kids SET class = %(class_next)s WHERE class = %(class_now)s""",
+            {"class_now":class_now, "class_next":class_next}
+            )
+    for session_code in all_session_codes:
+        with conn:
+            print(f'updating session code: {session_code}')
+            c.execute("""
+                UPDATE all_kids
+                SET session_code = %(session_code_next)s
+                WHERE session_code = %(session_code_now)s
+            """,
+            {"session_code_next":session_code[0:2]+conversion_map[session_code[-2:]], "session_code_now":session_code})
+    
+#RESETS ALL CLASS
+
+def change_class_from_session_code(all_session_codes):
+    for session_code in all_session_codes:
+        print(session_code)
+        with conn:
+            print(session_code[-2:])
+            c.execute("""
+            UPDATE all_kids
+            SET class = %(class)s
+            WHERE session_code = %(session_code)s
+            """,{
+                "session_code":session_code,
+                "class":session_code[-2:]
+            })
+
+def write_raw_sql(query_string):
+    with conn:
+        c.execute(query_string)
+
 if __name__ == "__main__":
+    #update_all_kids_classes(undo_class_conversion_map, message.all_session_codes)
+    #update_all_kids_classes(conversion_map)
     #print(get_attd_count_month("FP","102021"))
     #date_obj = get_attd_id_combis("10","2021")
     #print(get_age_group_total_obj("P", date_obj))
@@ -339,4 +402,7 @@ if __name__ == "__main__":
     #with conn:
     #    c.execute("UPDATE all_kids SET session")
     #
+    #update_all_kids_classes(descending_conversion_map)
+    #change_class_from_session_code(message.all_session_codes)
+    #write_raw_sql("""UPDATE all_kids SET absentee_cnt = 0 """)
     pass

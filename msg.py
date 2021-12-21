@@ -102,3 +102,5 @@ month_number_map = {
     "11":"Nov",
     "12":"Dec"
 }
+
+all_session_codes=["FPP6","FPP5","FPP4","FPP3","FJP2","FJP1","FJK2","FJK1","FJN1","FTN0","SPP6","SPP5","SPP4","SPP3","SJP2","SJP1","SJK2","SJK1","SJN1","STN0"]
