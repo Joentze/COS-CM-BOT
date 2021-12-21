@@ -149,12 +149,15 @@ def add_kid_into_attd(update, context):
         if len(session_code) != 4:
             update.message.reply_text(message_text["addkid_error"])
         elif len(session_code) == 4:
-            session = session_code[0:2]
-            kid_class = session_code[2:4]
-            DATE_TODAY,DATE_TODAY_SLASHED = give_sun_date_if_not_sun()
-            insert_new_kid({"name":name.strip(),"session_code":session_code,"session":session,"class":kid_class,"age":00})
-            attd_insert_new_kid(name.strip(), session_code + DATE_TODAY)            
-            update.message.reply_text(message_text["added_kid_success"] + message_text[session] + " " + kid_class)
+            try:
+                session = session_code[0:2]
+                kid_class = session_code[2:4]
+                DATE_TODAY,DATE_TODAY_SLASHED = give_sun_date_if_not_sun()
+                insert_new_kid({"name":name.strip(),"session_code":session_code,"session":session,"class":kid_class,"age":00})
+                attd_insert_new_kid(name.strip(), session_code + DATE_TODAY)            
+                update.message.reply_text(message_text["added_kid_success"] + message_text[session] + " " + kid_class)
+            except:
+                update.message.reply_text(message_text["addkid_error"])        
     else:
         update.message.reply_text(message_text["addkid_error"])
 
