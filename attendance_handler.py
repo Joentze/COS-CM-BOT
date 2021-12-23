@@ -74,6 +74,7 @@ def add_last_update(data, session_code, date):
 
 def update_absentee_cnt(date, session_code, mapped_val):
     for name, attendance_state in mapped_val.items():
+        print(f'updating {name}')
         update_absentee_cnt(date, name, session_code, attendance_state)
 
 def init_name_mapped_val(class_id):
