@@ -2,6 +2,7 @@
 from datetime import date, timedelta
 import json 
 import ast
+from typing import List
 from private import HEROKU_URI
 import csv
 import psycopg2 as sql
@@ -28,7 +29,11 @@ def update_absentee_cnt(date, data, session_code, curr_cnt):
         c.execute("""SELECT absentee_cnt FROM all_kids
                     WHERE name = %(name)s AND session_code = %(session_code)s""",
                     {"name":data, "session_code":session_code})
-        set_cnt = c.fetchall()
+        data_type = type(c.fetchall())
+        if data_type == list:
+            set_cnt = convert_fetchall_array(c.fetchall())[0]
+        else:
+            set_cnt = c.fetchall()
         with conn:
             if add_last_update(data, session_code, date):
                 c.execute(
