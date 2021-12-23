@@ -28,7 +28,7 @@ def update_absentee_cnt(date, data, session_code, curr_cnt):
         c.execute("""SELECT absentee_cnt FROM all_kids
                     WHERE name = %(name)s AND session_code = %(session_code)s""",
                     {"name":data, "session_code":session_code})
-        set_cnt = convert_fetchall_array(c.fetchall())[0]
+        set_cnt = c.fetchall()
         with conn:
             if add_last_update(data, session_code, date):
                 c.execute(
