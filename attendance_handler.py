@@ -72,7 +72,7 @@ def add_last_update(data, session_code, date):
         {"name":data, "session_code":session_code, "last_update":date})
         return True
 
-def update_absentee_cnt(date, session_code, mapped_val):
+def collate_absentee_cnt(date, session_code, mapped_val):
     for name, attendance_state in mapped_val.items():
         print(f'updating {name}')
         update_absentee_cnt(date, name, session_code, attendance_state)
