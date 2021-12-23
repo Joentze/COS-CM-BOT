@@ -1,6 +1,6 @@
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackQueryHandler
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton
-from attendance_handler import create_inline_obj, init_name_mapped_val, update_name_mapped_val, attd_insert_new_kid,add_in_new_attd, get_attd_obj_by_id, inside_bool_db,startup_user,get_user_readable_data,insert_class_user, insert_session_user,insert_session_id_user,get_user_session_code, insert_new_kid, get_praise_jam_attendance_array
+from attendance_handler import create_inline_obj, init_name_mapped_val, update_name_mapped_val, attd_insert_new_kid,add_in_new_attd, get_attd_obj_by_id, inside_bool_db,startup_user,get_user_readable_data,insert_class_user, insert_session_user,insert_session_id_user,get_user_session_code, insert_new_kid, get_praise_jam_attendance_array, update_absentee_cnt
 from excel_auto import init_workbook
  #attd_change_inline_button
 import time
@@ -66,6 +66,7 @@ def submit_attd(update, context):
     mapped_val = get_attd_obj_by_id(attd_id)
     add_in_new_attd(attd_id, str(mapped_val))
     new_changes_markup = {'inline_keyboard':[[{'callback_data':'change_attd', 'text':'Make Changes 📋'}]]}
+    update_absentee_cnt(DATE_TODAY, user_session, mapped_val)
     context.bot.edit_message_text(chat_id=get_chat_id, message_id=query.message.message_id, text=message_text["attendance_submit"], reply_markup=new_changes_markup)
 
 def change_attd(update, context):
@@ -153,7 +154,7 @@ def add_kid_into_attd(update, context):
                 session = session_code[0:2]
                 kid_class = session_code[2:4]
                 DATE_TODAY,DATE_TODAY_SLASHED = give_sun_date_if_not_sun()
-                insert_new_kid({"name":name.strip(),"session_code":session_code,"session":session,"class":kid_class,"age":00})
+                insert_new_kid({"name":name.strip(),"session_code":session_code,"session":session,"class":kid_class,"age":00, "attendance_cnt":0})
                 attd_insert_new_kid(name.strip(), session_code + DATE_TODAY)            
                 update.message.reply_text(message_text["added_kid_success"] + message_text[session] + " " + kid_class)
             except:

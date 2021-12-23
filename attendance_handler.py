@@ -22,6 +22,60 @@ def update_name_mapped_val(data, mapped_val):
         mapped_val[data] = 0
     return mapped_val
 
+def update_absentee_cnt(date, data, session_code, curr_cnt):
+    #curr_cnt = mapped_val[data]
+    if curr_cnt==0:
+        c.execute("""SELECT absentee_cnt FROM all_kids
+                    WHERE name = %(name)s AND session_code = %(session_code)s""",
+                    {"name":data, "session_code":session_code})
+        set_cnt = convert_fetchall_array(c.fetchall())[0]
+        with conn:
+            if add_last_update(data, session_code, date):
+                c.execute(
+                    """
+                    UPDATE all_kids
+                    SET absentee_cnt = %(set_cnt)s
+                    WHERE name = %(name)s AND session_code = %(session_code)s
+                    """,
+                    {"name":data, "session_code":session_code, "set_cnt":set_cnt+1}
+                )
+    elif curr_cnt > 0:
+        with conn:
+            c.execute(
+                """
+                UPDATE all_kids
+                SET absentee_cnt = 0
+                WHERE name = %(name)s AND session_code = %(session_code)s
+                """,
+                {"name":data, "session_code":session_code}
+            )
+
+#updates last update column in ddmmyyyy format in string
+def add_last_update(data, session_code, date):
+    
+    c.execute("""
+    SELECT last_update FROM all_kids
+    WHERE name = %(name)s AND session_code = %(session_code)s
+    """,
+    {"name":data, "session_code":session_code})
+    get_last_update_date = convert_fetchall_array(c.fetchall())[0]
+    if get_last_update_date == date:
+        print("date is updated")
+        return False
+    else:
+        print("date is not updated")
+        c.execute("""
+        UPDATE all_kids
+        SET last_update = %(last_update)s
+        WHERE name = %(name)s AND session_code = %(session_code)s
+        """,
+        {"name":data, "session_code":session_code, "last_update":date})
+        return True
+
+def update_absentee_cnt(date, session_code, mapped_val):
+    for name, attendance_state in mapped_val.items():
+        update_absentee_cnt(date, name, session_code, attendance_state)
+
 def init_name_mapped_val(class_id):
     return_dict = {}
     for name in get_all_names_for_class(class_id):
@@ -404,5 +458,6 @@ if __name__ == "__main__":
     #
     #update_all_kids_classes(descending_conversion_map)
     #change_class_from_session_code(message.all_session_codes)
-    #write_raw_sql("""UPDATE all_kids SET absentee_cnt = 0 """)
+    #write_raw_sql("""ALTER TABLE all_kids ADD last_update text""")
+    #update_absentee_cnt("25122021","Levi Ow Yong", "FTN0",2)
     pass
