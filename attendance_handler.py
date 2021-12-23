@@ -58,7 +58,7 @@ def add_last_update(data, session_code, date):
     WHERE name = %(name)s AND session_code = %(session_code)s
     """,
     {"name":data, "session_code":session_code})
-    get_last_update_date = convert_fetchall_array(c.fetchall())[0]
+    get_last_update_date = c.fetchall()
     if get_last_update_date == date:
         print("date is updated")
         return False
