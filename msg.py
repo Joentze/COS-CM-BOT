@@ -28,6 +28,7 @@ Misc. Stuff:
 
 Work Stuff:
 /attendance - Sends the attendance for the class of session stated in your profile 📋
+/absentee - Shows kids that have been absent for more than 2 weeks 🚩
 /collate MM/YYYY - Collates attendance for the week and sends an excel file.
 
 🤔Change to other classes (via /setclass) to change their attendance

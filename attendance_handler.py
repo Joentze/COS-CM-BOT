@@ -77,7 +77,7 @@ def get_names_absentee_cnt(session_code):
         c.execute("""
         SELECT name, absentee_cnt
         FROM all_kids
-        WHERE session_code = %(session_code)s AND absentee_cnt > 1
+        WHERE session_code = %(session_code)s AND absentee_cnt > 2
         """,
         {"session_code":session_code}
         )
