@@ -187,11 +187,11 @@ def collate_attendance_month(update, context):
         update.message.reply_text(message_text["date_format_error"]) 
 
 def get_absentee_red_flags(update, context):
-    get_chat_id = update.callback_query.message.chat.id
-    user_session = get_user_session_code(str(get_chat_id))
+    chat_id = update.message.from_user["id"]
+    user_session = get_user_session_code(str(chat_id))
     name_list = get_names_absentee_cnt(user_session)
     message = f"List shows kids that have been absent for more than 3 weeks 🥶:\n\n{name_list}"
-    update.message.reply_text(message_text["date_format_error"]) 
+    update.message.reply_text(message) 
 
 
 
