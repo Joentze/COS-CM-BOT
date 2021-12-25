@@ -1,6 +1,6 @@
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackQueryHandler
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton
-from attendance_handler import create_inline_obj, init_name_mapped_val, update_name_mapped_val, attd_insert_new_kid,add_in_new_attd, get_attd_obj_by_id, inside_bool_db,startup_user,get_user_readable_data,insert_class_user, insert_session_user,insert_session_id_user,get_user_session_code, insert_new_kid, get_praise_jam_attendance_array, collate_absentee_cnt
+from attendance_handler import create_inline_obj, init_name_mapped_val, update_name_mapped_val, attd_insert_new_kid,add_in_new_attd, get_attd_obj_by_id, inside_bool_db,startup_user,get_user_readable_data,insert_class_user, insert_session_user,insert_session_id_user,get_user_session_code, insert_new_kid, get_praise_jam_attendance_array, collate_absentee_cnt, get_names_absentee_cnt
 from excel_auto import init_workbook
  #attd_change_inline_button
 import time
@@ -186,9 +186,12 @@ def collate_attendance_month(update, context):
     else:
         update.message.reply_text(message_text["date_format_error"]) 
 
-
-
-
+def get_absentee_red_flags(update, context):
+    get_chat_id = update.callback_query.message.chat.id
+    user_session = get_user_session_code(str(get_chat_id))
+    name_list = get_names_absentee_cnt(user_session)
+    message = f"List shows kids that have been absent for more than 3 weeks 🥶:\n\n{name_list}"
+    update.message.reply_text(message_text["date_format_error"]) 
 
 
 
@@ -202,6 +205,7 @@ def run():
     dp.add_handler(CommandHandler('setclass',update_profile))
     dp.add_handler(CommandHandler('attendance', attd_date_msg))
     dp.add_handler(CommandHandler('verse', getverse))
+    dp.add_handler(CommandHandler('absentee', get_absentee_red_flags))
     dp.add_handler(CommandHandler('addkid', add_kid_into_attd))
     dp.add_handler(CommandHandler('collate', collate_attendance_month))
     dp.add_handler(CallbackQueryHandler(update_attd,pattern="attd_"))

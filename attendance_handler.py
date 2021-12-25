@@ -72,6 +72,22 @@ def add_last_update(data, session_code, date):
         {"name":data, "session_code":session_code, "last_update":date})
         return True
 
+def get_names_absentee_cnt(session_code):
+    with conn:
+        c.execute("""
+        SELECT name, absentee_cnt
+        FROM all_kids
+        WHERE session_code = %(session_code)s AND absentee_cnt > 1
+        """,
+        {"session_code":session_code}
+        )
+        return_set = []
+        for name, cnt in c.fetchall():
+            this_line = f"{name}: 🚩 X {cnt}"
+            return_set.append(this_line)
+        return '\n'.join(return_set)
+
+
 def collate_absentee_cnt(date, session_code, mapped_val):
     for name, attendance_state in mapped_val.items():
         print(f'updating {name}')
@@ -459,6 +475,7 @@ if __name__ == "__main__":
     #
     #update_all_kids_classes(descending_conversion_map)
     #change_class_from_session_code(message.all_session_codes)
-    #write_raw_sql("""ALTER TABLE all_kids ADD last_update text""")
+    #write_raw_sql("""DELETE FROM all_attd WHERE attd_id = 'SPP619122021'""")
     #update_absentee_cnt("25122021","Levi Ow Yong", "FTN0",2)
+    print(get_names_absentee_cnt("FPP4"))
     pass
