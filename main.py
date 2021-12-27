@@ -1,6 +1,6 @@
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackQueryHandler
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackQueryHandler, JobQueue
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton
-from attendance_handler import create_inline_obj, init_name_mapped_val, update_name_mapped_val, attd_insert_new_kid,add_in_new_attd, get_attd_obj_by_id, inside_bool_db,startup_user,get_user_readable_data,insert_class_user, insert_session_user,insert_session_id_user,get_user_session_code, insert_new_kid, get_praise_jam_attendance_array, collate_absentee_cnt, get_names_absentee_cnt
+from attendance_handler import create_inline_obj, get_all_chat_id, init_name_mapped_val, update_name_mapped_val, attd_insert_new_kid,add_in_new_attd, get_attd_obj_by_id, inside_bool_db,startup_user,get_user_readable_data,insert_class_user, insert_session_user,insert_session_id_user,get_user_session_code, insert_new_kid, get_praise_jam_attendance_array, collate_absentee_cnt, get_names_absentee_cnt, get_all_chat_id
 from excel_auto import init_workbook
  #attd_change_inline_button
 import time
@@ -193,7 +193,20 @@ def get_absentee_red_flags(update, context):
     message = f"List shows kids that have been absent for more than 3 weeks 🥶:\n\n{name_list}"
     update.message.reply_text(message) 
 
+def send_all_reminder_msg(context):
+    all_chat_ids = get_all_chat_id()
+    for chat_id in all_chat_ids:
+        try:
+            context.bot.send_message(chat_id=chat_id, text="hello, do not be alarmed, this is a test")
+        except:
+            pass
 
+def scheduler(dp):
+    job_queue = JobQueue()
+    job_queue.set_dispatcher(dp)
+    this_time = time(9, 43, 00, 00000)
+    job_queue.run_daily(callback=send_all_reminder_msg, time= this_time, days=(0,))
+    job_queue.start()
 
 def run():
     updater = Updater(TELEGRAM_TOKEN)
@@ -215,6 +228,7 @@ def run():
     dp.add_handler(CallbackQueryHandler(J_submit_user_session_data,pattern="submit_user_session_data_J"))
     dp.add_handler(CallbackQueryHandler(T_submit_user_session_data,pattern="submit_user_session_data_T"))
     dp.add_handler(CallbackQueryHandler(submit_user_class_data,pattern="submit_user_class_data_"))
+    scheduler(dp)
     updater.start_polling()
     updater.idle()
 

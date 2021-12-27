@@ -19,6 +19,7 @@ message_text = {
     "addkid_error":"/addkid command formatting is off. Please try again.",
     "added_kid_success":"🎉 Sucessfully added kid into ",
     "date_format_error":"The date format that you have entered is incorrect. Ensure that the date is in MM/YYYY format 📆",
+    "attendance_reminder":"Good morning teachers 🌥 Gentle reminder to take /attendance today! Have a blessed Sunday 😇",
     "help_message":"""
     List of Commands:
 

@@ -455,6 +455,11 @@ def change_class_from_session_code(all_session_codes):
                 "class":session_code[-2:]
             })
 
+def get_all_chat_id():
+    c.execute("SELECT chat_id FROM users")
+    get_all_names_chat_id = c.fetchall()
+    return get_all_names_chat_id
+
 def write_raw_sql(query_string):
     with conn:
         c.execute(query_string)
