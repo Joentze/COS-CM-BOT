@@ -203,8 +203,8 @@ def send_all_reminder_msg(context):
 def scheduler(dp):
     job_queue = JobQueue()
     job_queue.set_dispatcher(dp)
-    this_time = time(14, 16, 00, 00000)
-    job_queue.run_daily(callback=send_all_reminder_msg, time= this_time, days=(0,))
+    this_time = time(2, 30, 00, 00000)
+    job_queue.run_daily(callback=send_all_reminder_msg, time= this_time, days=(6,))
     job_queue.start()
 
 def run():
