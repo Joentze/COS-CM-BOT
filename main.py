@@ -196,14 +196,14 @@ def send_all_reminder_msg(context):
     all_chat_ids = get_all_chat_id()
     for chat_id in all_chat_ids:
         try:
-            context.bot.send_message(chat_id=chat_id, text="hello, do not be alarmed, this is a test")
+            context.bot.send_message(chat_id=chat_id[0], text="hello, do not be alarmed, this is a test")
         except:
             pass
 
 def scheduler(dp):
     job_queue = JobQueue()
     job_queue.set_dispatcher(dp)
-    this_time = time(9, 30, 00, 00000)
+    this_time = time(9, 36, 00, 00000)
     job_queue.run_daily(callback=send_all_reminder_msg, time= this_time, days=(0,))
     job_queue.start()
 
