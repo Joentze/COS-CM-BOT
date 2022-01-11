@@ -2,7 +2,7 @@
 from datetime import date, timedelta
 import json 
 import ast
-from private import HEROKU_URI
+#from private import HEROKU_URI
 import csv
 import psycopg2 as sql
 import msg as message
@@ -109,7 +109,9 @@ def attd_insert_new_kid(name, attd_id):
         obj_state[name.strip()] = 1
         add_in_new_attd(attd_id, str(obj_state))
 
-conn = sql.connect(HEROKU_URI, sslmode='require')
+#conn = sql.connect(HEROKU_URI, sslmode='require')
+conn = sql.connect("postgres://rtdzucgprdiqjl:627a98ca7ea1da64f8dc869da0af65a5b49cf27242294be1e83ebbbf23cc475d@ec2-18-211-194-36.compute-1.amazonaws.com:5432/dafbp8vq34ktqn", sslmode='require')
+
 c = conn.cursor()
 #
 #c.execute("""CREATE TABLE users (
@@ -464,8 +466,9 @@ def write_raw_sql(query_string):
     with conn:
         c.execute(query_string)
 
+
 if __name__ == "__main__":
-    #update_all_kids_classes(undo_class_conversion_map, message.all_session_codes)
+    #update_all_kids_classes(descending_class_conversion_map, message.all_session_codes)
     #update_all_kids_classes(conversion_map)
     #print(get_attd_count_month("FP","102021"))
     #date_obj = get_attd_id_combis("10","2021")
@@ -480,7 +483,7 @@ if __name__ == "__main__":
     #
     #update_all_kids_classes(descending_conversion_map)
     #change_class_from_session_code(message.all_session_codes)
-    #write_raw_sql("""DELETE FROM all_attd WHERE attd_id = 'SPP619122021'""")
+
+    write_raw_sql("""DELETE FROM all_attd WHERE attd_id = 'SJK2'""")
     #update_absentee_cnt("25122021","Levi Ow Yong", "FTN0",2)
-    print(get_names_absentee_cnt("FPP4"))
     pass

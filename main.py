@@ -207,6 +207,22 @@ def scheduler(dp):
     job_queue.run_daily(callback=send_all_reminder_msg, time= this_time, days=(6,))
     job_queue.start()
 
+def get_date_attendance(update, context):
+    get_chat_id = update.callback_query.message.chat.id
+    user_session = get_user_session_code(str(get_chat_id))
+    message = update.message.text
+    date_input = message.replace("/getattd","").strip().replace('/','')
+    attd_obj = get_attd_obj_by_id(user_session+date_input)
+    if attd_obj == False:
+        update.message.reply_text("This date is not available")
+    else:
+        return_string = []
+        state_obj = {0:'absent', 1:'Zoom', 2:'Church'}
+        for name, number in attd_obj.items():
+            return_string.append(f'{name}-->{state_obj[number]}')
+        update.message.reply_text('\n'.join(return_string))
+
+
 def run():
     updater = Updater(TELEGRAM_TOKEN)
     dp = updater.dispatcher
