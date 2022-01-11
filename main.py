@@ -217,7 +217,7 @@ def get_date_attendance(update, context):
         update.message.reply_text("This date is not available")
     else:
         return_string = []
-        state_obj = {0:'absent', 1:'Zoom', 2:'Church'}
+        state_obj = {0:'Absent', 1:'Church', 2:'Zoom'}
         for name, number in attd_obj.items():
             return_string.append(f'{name}-->{state_obj[number]}')
         update.message.reply_text('\n'.join(return_string))
