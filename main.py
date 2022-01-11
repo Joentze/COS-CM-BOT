@@ -209,7 +209,7 @@ def scheduler(dp):
 
 def get_date_attendance(update, context):
     chat_id = update.message.from_user["id"]
-    user_session = get_user_session_code(str(get_chat_id))
+    user_session = get_user_session_code(str(chat_id))
     message = update.message.text
     date_input = message.replace("/getattd","").strip().replace('/','')
     attd_obj = get_attd_obj_by_id(user_session+date_input)
