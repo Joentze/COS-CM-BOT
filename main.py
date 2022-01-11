@@ -236,6 +236,7 @@ def run():
     dp.add_handler(CommandHandler('absentee', get_absentee_red_flags))
     dp.add_handler(CommandHandler('addkid', add_kid_into_attd))
     dp.add_handler(CommandHandler('collate', collate_attendance_month))
+    dp.add_handler(CommandHandler('getattd', get_date_attendance))
     dp.add_handler(CallbackQueryHandler(update_attd,pattern="attd_"))
     dp.add_handler(CallbackQueryHandler(submit_attd,pattern="submit_attd"))
     dp.add_handler(CallbackQueryHandler(change_attd,pattern="change_attd"))
