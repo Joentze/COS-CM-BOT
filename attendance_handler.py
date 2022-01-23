@@ -469,7 +469,7 @@ def delete_user_from_attd(chat_id):
         DELETE FROM users 
         WHERE chat_id = %(chat_id)s
         """, 
-        {"chat_id":chat_id}
+        {"chat_id":str(chat_id)}
         )
 
 def write_raw_sql(query_string):
