@@ -1,6 +1,6 @@
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackQueryHandler, JobQueue
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton
-from attendance_handler import create_inline_obj, get_all_chat_id, init_name_mapped_val, update_name_mapped_val, attd_insert_new_kid,add_in_new_attd, get_attd_obj_by_id, inside_bool_db,startup_user,get_user_readable_data,insert_class_user, insert_session_user,insert_session_id_user,get_user_session_code, insert_new_kid, get_praise_jam_attendance_array, collate_absentee_cnt, get_names_absentee_cnt, get_all_chat_id
+from attendance_handler import create_inline_obj, delete_user_from_attd, get_all_chat_id, init_name_mapped_val, update_name_mapped_val, attd_insert_new_kid,add_in_new_attd, get_attd_obj_by_id, inside_bool_db,startup_user,get_user_readable_data,insert_class_user, insert_session_user,insert_session_id_user,get_user_session_code, insert_new_kid, get_praise_jam_attendance_array, collate_absentee_cnt, get_names_absentee_cnt, get_all_chat_id, delete_user_from_attd
 from excel_auto import init_workbook
  #attd_change_inline_button
 from datetime import datetime, timedelta, time
@@ -26,6 +26,11 @@ def start_msg(update, context):
         name, session, user_class = get_user_readable_data(chat_id)
         data_checking_string = f"NAME: {name}\nCLASS: {user_class}\nSESSION: {message_text[session]}"
         update.message.reply_text(data_checking_string)
+
+def stop_bot(update, context):
+    chat_id = update.message.from_user["id"]
+    update.message.reply_text("Stopping Bot...")
+    delete_user_from_attd(chat_id)
 
 def attd_date_msg(update, context):
     get_chat_id = update.message.from_user["id"]
@@ -227,6 +232,7 @@ def run():
     updater = Updater(TELEGRAM_TOKEN)
     dp = updater.dispatcher
     dp.add_handler(CommandHandler('start',start_msg))
+    dp.add_handler(CommandHandler('stop',stop_bot))
     dp.add_handler(CommandHandler('timetest',get_time_test))
     dp.add_handler(CommandHandler('help',help_msg))
     dp.add_handler(CommandHandler('advancehelp',advance_help_msg))

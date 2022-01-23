@@ -462,6 +462,16 @@ def get_all_chat_id():
     get_all_names_chat_id = c.fetchall()
     return get_all_names_chat_id
 
+
+def delete_user_from_attd(chat_id):
+    with conn:
+        c.execute("""
+        DELETE FROM users 
+        WHERE chat_id = %(chat_id)s
+        """, 
+        {"chat_id":chat_id}
+        )
+
 def write_raw_sql(query_string):
     with conn:
         c.execute(query_string)
@@ -484,6 +494,6 @@ if __name__ == "__main__":
     #update_all_kids_classes(descending_conversion_map)
     #change_class_from_session_code(message.all_session_codes)
 
-    write_raw_sql("""DELETE FROM all_attd WHERE attd_id = 'SJK2'""")
+    #write_raw_sql("""DELETE FROM all_attd WHERE attd_id = 'SJK2'""")
     #update_absentee_cnt("25122021","Levi Ow Yong", "FTN0",2)
     pass
