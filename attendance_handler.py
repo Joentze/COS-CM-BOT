@@ -2,7 +2,7 @@
 from datetime import date, timedelta
 import json 
 import ast
-#from private import HEROKU_URI
+from private import HEROKU_URI
 import csv
 import psycopg2 as sql
 import msg as message
@@ -109,8 +109,8 @@ def attd_insert_new_kid(name, attd_id):
         obj_state[name.strip()] = 1
         add_in_new_attd(attd_id, str(obj_state))
 
-#conn = sql.connect(HEROKU_URI, sslmode='require')
-conn = sql.connect("postgres://rtdzucgprdiqjl:627a98ca7ea1da64f8dc869da0af65a5b49cf27242294be1e83ebbbf23cc475d@ec2-18-211-194-36.compute-1.amazonaws.com:5432/dafbp8vq34ktqn", sslmode='require')
+conn = sql.connect(HEROKU_URI, sslmode='require')
+
 
 c = conn.cursor()
 #
