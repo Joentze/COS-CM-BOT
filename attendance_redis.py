@@ -12,7 +12,8 @@ except:
     print("moving on to secrets")
     REDIS_URL = keys.REDIS_KEY
 
-class RedisDB:
+#handles redis db, navigates and edits values
+class RedisHandler:
 
     def __init__(self, URL):
         self.r = redis.from_url(URL)
@@ -23,37 +24,50 @@ class RedisDB:
         subsequent_dirs = dirs[1:]
         return main_key, subsequent_dirs
 
-    def get_value_from_path(self, path:str):
-        main_key, subsequent_dirs = self.split_paths(path)
-        r_return = self.r.get(main_key)
-        if r_return != None:
-            obj = json.loads(r_return)
-            for this_dir in subsequent_dirs:
-                try:
-                    curr_group = obj[this_dir]
-                except (TypeError, KeyError) as e:
-                    return None
-            return curr_group
-        else:
-            return None
-    
-#    def change_value_from_path(self, path:str, value:object):
-#        main_key, subsequent_dirs = self.split_paths(path)
-#        if len(subsequent_dirs) > 0:
-#            obj = json.loads(self.r.get(main_key))
-#            for this_dir in subsequent_dirs:
-#                if type(obj) != str:
-#                    try:
-#                        obj = obj[this_dir]
-#                        if this_dir == subsequent_dirs[-1]:
-#                            obj = value
-#                    except KeyError:
-#                        break
-#            self.r.set(main_key, json.dumps(obj))
-#        else:
-#            self.r.set(path, json.dumps(value))
+    #recursively navigates to object value via paths and edits value
+    def add_value_from_path(self, paths, obj, value):
+        if len(paths) > 1:
+            new_obj = obj[paths[0]]
+            paths.pop(0)
+            self.two_change_path(paths, new_obj, value)
+        elif len(paths) == 1:
+            obj[paths[0]] = value
+        return obj 
 
-#db = RedisDB(REDIS_URL)
-#print(db.change_value_from_path("test/hello",[1,2,3]))
-#print(db.get_value_from_path("test/hello"))
+    #recursively navigates to object value via paths and returns value
+    def navigate_to_value_from_path(self, paths, obj):
+        if len(paths) > 1:
+            new_obj = obj[paths[0]]
+            paths.pop(0)
+            self.two_change_path(paths, new_obj)
+        elif len(paths) == 1:
+            return obj[paths[0]]
+
+    #changes value at endpoint of paths
+    def change_value_from_path(self, paths, value):
+        main_key, subsequent_dirs = self.split_paths(paths)        
+        if len(subsequent_dirs) > 0:
+            obj = json.loads(self.r.get(main_key))
+            edited_obj = self.add_value_from_path(subsequent_dirs, obj, value)
+            self.r.set(main_key, json.dumps(edited_obj))
+        else:
+            value_type = type(value)
+            if value_type == str:
+                self.r.set(main_key, value)
+            else:
+                self.r.set(main_key, json.dumps(value))
+
+    #reads value at endpoint of paths
+    def read_value_from_path(self, paths):
+        main_key, subsequent_dirs = self.split_paths(paths)
+        if len(subsequent_dirs) > 0:
+            obj = json.loads(self.r.get(main_key))
+            return self.navigate_to_value_from_path(subsequent_dirs, obj)
+        else:
+            return self.r.get(main_key)
+
+db = RedisHandler(REDIS_URL)
+#print(db.change_value_from_path("hello", {"hi":[0,2,1]}))
+#print(db.read_value_from_path("hello/hi"))
+print(db.get_value_from_path("hello"))
 
