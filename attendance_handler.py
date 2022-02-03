@@ -2,10 +2,22 @@
 from datetime import date, timedelta
 import json 
 import ast
-from private import HEROKU_URI
+#from private import HEROKU_URI
 import csv
 import psycopg2 as sql
 import msg as message
+import os
+import sys
+sys.path.insert(0, '/Users/Joen/Documents/COS-CM-BOT/secret')
+import keys  
+
+try:
+    HEROKU_CRED = os.environ["HEROKU_POSTGRES_CREDENTIALS"]
+except:
+    print("moving on to secrets")
+    HEROKU_CRED = keys.PG_HEROKU_KEY
+
+
 def create_inline_obj(mapped_val):
     emoji_list = {0:'Absent ❌',1:' Church ⛪️',2:'Zoom 👩🏻‍💻'}
     inline_array = []
@@ -109,7 +121,7 @@ def attd_insert_new_kid(name, attd_id):
         obj_state[name.strip()] = 1
         add_in_new_attd(attd_id, str(obj_state))
 
-conn = sql.connect(HEROKU_URI, sslmode='require')
+conn = sql.connect(HEROKU_CRED, sslmode='require')
 
 
 c = conn.cursor()
@@ -494,6 +506,6 @@ if __name__ == "__main__":
     #update_all_kids_classes(descending_conversion_map)
     #change_class_from_session_code(message.all_session_codes)
 
-    #write_raw_sql("""DELETE FROM all_attd WHERE attd_id = 'SJK2'""")
+    #print(write_raw_sql("""SELECT * FROM all_attd WHERE attd_id LIKE '________2021'"""))
     #update_absentee_cnt("25122021","Levi Ow Yong", "FTN0",2)
     pass
