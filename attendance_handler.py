@@ -9,11 +9,13 @@ import msg as message
 import os
 import sys
 sys.path.insert(0, '/Users/Joen/Documents/COS-CM-BOT/secret')
-import keys  
+
 
 try:
+    print("using environment variables")
     HEROKU_CRED = os.environ["HEROKU_POSTGRES_CREDENTIALS"]
 except:
+    import keys  
     print("moving on to secrets")
     HEROKU_CRED = keys.PG_HEROKU_KEY
 

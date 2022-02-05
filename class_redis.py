@@ -3,12 +3,14 @@ import os
 import sys
 import json
 sys.path.insert(0, '/Users/Joen/Documents/COS-CM-BOT/secret')
-import keys  
+
 
 try:
+    print("using environment variables")
     REDIS_URL = os.environ['REDIS_URL']
 except:
-    print("moving on to secrets")
+    import keys  
+    print("moving on to redis secrets")
     REDIS_URL = keys.REDIS_KEY
 
 #handles redis db, navigates and edits values

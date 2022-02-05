@@ -74,12 +74,6 @@ class AttendanceHandler:
         else:
             self.add_absentee_cnt(attd_id)
 
-
-
-
-
-        
-
 if __name__ == "__main__":
     test = AttendanceHandler()
     test.add_attendance("FPP6test")
