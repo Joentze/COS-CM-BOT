@@ -6,7 +6,7 @@ from excel_auto import init_workbook
 from datetime import datetime, timedelta, time
 from msg import message_text, inline_options, month_number_map
 from random_verse import get_random_verse
-from db_handler import AttendanceHandler
+#from db_handler import AttendanceHandler
 import os
 
 import sys
