@@ -20,7 +20,7 @@ except:
     print("moving on to secrets")
     TELEGRAM_TOKEN = keys.TEST_TELEGRAM_KEY
 
-attd = AttendanceHandler()
+#attd = AttendanceHandler()
 
 def start_msg(update, context):
     chat_id = update.message.from_user["id"]
