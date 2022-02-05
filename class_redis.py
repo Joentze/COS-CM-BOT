@@ -49,7 +49,6 @@ class RedisHandler:
     
     #changes value at endpoint of paths
     def edit_value_from_path(self, paths:str, value):
-        print("adding kid...")
         main_key, subsequent_dirs = self.split_paths(paths)        
         if len(subsequent_dirs) > 0:
             obj = json.loads(self.r.get(main_key))

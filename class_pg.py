@@ -26,13 +26,14 @@ class PostgresHandler:
                 %(session_code)s,
                 %(session)s,
                 %(class)s,
+                0
             )
             """,
             {
                 "name":name,
                 "session_code":session_code,
                 "session":session_code[:2],
-                "class":session_code[-2:]
+                "class":session_code[-2:],
             }
             )
     #remove from kid from all_kids table
@@ -60,7 +61,56 @@ class PostgresHandler:
         }
         )
         return [i[0] for i in self.c.fetchall()]
+
+    def get_chat_ids(self):
+        self.c.execute(
+        """
+        SELECT chat_id FROM users
+        """
+        )
+        return [i[0] for i in self.c.fetchall()]
+    
+    def get_absentees_from_class(self, session_code):
+        self.c.execute(
+            """
+            SELECT name, absentee_cnt FROM all_kids
+            WHERE absentee_cnt > 3 AND
+            session_code = %(session_code)s
+            """,
+            {
+                "session_code":session_code
+            }
+        )
+        return self.c.fetchall()
+    
+    def return_updated(self, session_code, date):
+        self.c.execute(
+        """
+        SELECT name FROM all_kids
+        WHERE session_code = %(session_code)s 
+        AND
+        date = %(date)s
+        """,
+        {
+            "session_code":session_code,
+            "date":date
+        }
+        )
+        return [i[0] for i in self.c.fetchall()]
+    
+    def update_date(self, session_code, date):
+        with self.conn:
+            self.c.execute(
+                """
+                UPDATE all_kids
+                SET date = %(date)s
+                WHERE session_code = %(session_code)s
+                """,
+                {
+                    "date":date,
+                    "session_code":session_code
+                }
+                )
         
 if __name__ == "__main__":
     pg =  PostgresHandler()
-    print(pg.get_names_in_class("FPP6"))
