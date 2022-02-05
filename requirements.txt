@@ -23,6 +23,7 @@ nipype==1.7.0
 nltk==3.6.7
 numpy==1.22.0
 opencv-python==4.5.5.62
+openpyxl==3.0.9
 packaging==21.3
 pandas==1.4.0
 pdf2image==1.16.0

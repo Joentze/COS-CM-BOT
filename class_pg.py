@@ -70,20 +70,8 @@ class PostgresHandler:
         )
         return [i[0] for i in self.c.fetchall()]
     
-    def get_absentees_from_class(self, session_code):
-        self.c.execute(
-            """
-            SELECT name, absentee_cnt FROM all_kids
-            WHERE absentee_cnt > 3 AND
-            session_code = %(session_code)s
-            """,
-            {
-                "session_code":session_code
-            }
-        )
-        return self.c.fetchall()
-    
-    def return_updated(self, session_code, date):
+
+    def updated_names(self, session_code, date):
         self.c.execute(
         """
         SELECT name FROM all_kids
@@ -114,3 +102,5 @@ class PostgresHandler:
         
 if __name__ == "__main__":
     pg =  PostgresHandler()
+    with pg.conn:
+        pg.c.execute("ALTER TABLE all_kids DROP COLUMN absentee_")

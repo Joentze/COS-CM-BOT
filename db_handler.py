@@ -13,9 +13,9 @@ class AttendanceHandler:
     def get_attendance(self, attd_id):
         if self.red.r.exists(attd_id):
             obj = self.red.r.get(attd_id)
-            return create_inline_obj(json.loads(obj))
+            return self.create_inline_object(json.loads(obj))
         else:
-            return create_inline_obj(json.loads(self.add_attendance(attd_id)))
+            return self.create_inline_object(json.loads(self.add_attendance(attd_id)))
 
     #adds attendance for sunday
     def add_attendance(self, attd_id):
@@ -43,7 +43,7 @@ class AttendanceHandler:
             curr_obj[name] += 1
         elif curr_obj[name] == 0:
             curr_obj[name] = 0
-        self.red.set(attd_id, json.dumps(curr_obj))
+        self.red.r.set(attd_id, json.dumps(curr_obj))
         return self.create_inline_object(curr_obj)
 
     #adds name of kid to attendance
@@ -59,32 +59,20 @@ class AttendanceHandler:
             return True
         else:
             return None
-            
-    #adds absentee cnt and creates one each year
-    def add_absentee_cnt(self, attd_id):
-        session_code = attd_id[:4]
-        year = attd_id[-4:]
-        names = self.pg.get_names_in_class(session_code)
-        obj = {}
-        for name in names:
-            obj[name] = 0
-        self.red.r.set(f"absentee_{session_code}_{year}", json.dumps(obj))
 
+    #udpates absentee cnt table
     def update_absentee_cnt(self, attd_id):
         absent_id = f"absentee_{attd_id[:4]}_{attd_id[-4:]}"
-        if self.red.r.exists(absent_id):
-            attd_obj = json.loads(self.red.r.get(attd_id))
-            absentee_obj = json.loads(self.red.r.get(absent_id))
-            for k, v in attd_obj.items():
-                if v == 0:
-                    if k not in self.pg.return_updated(attd_id[:4], attd_id[-8:]):
-                        absentee_obj[k] += 1
-                elif v > 0:
-                    absentee_obj[k] = 0
-            self.red.r.set(absent_id, json.dumps(absentee_obj))
-        else:
-            self.add_absentee_cnt(attd_id)
-            self.pg.update_date(attd_id[:4], attd_id[-8:])
+        attd_obj = json.loads(self.red.r.get(attd_id))
+        updated_names = self.pg.updated_names(attd_id[:4], attd_id[-8:])
+        for k, v in attd_obj.items():
+            if v == 0:
+                if k not in updated_names:
+                    attd_obj[k] += 1
+            elif v > 0:
+                attd_obj[k] = 0
+        self.red.r.set(absent_id, json.dumps(attd_obj))
+        self.pg.update_date(attd_id[:4], attd_id[-8:])
 
 if __name__ == "__main__":
     test = AttendanceHandler()
