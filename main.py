@@ -5,22 +5,13 @@ from excel_auto import init_workbook
  #attd_change_inline_button
 from datetime import datetime, timedelta, time
 from msg import message_text, inline_options, month_number_map
+from private import TELEGRAM_TOKEN
 from random_verse import get_random_verse
-#from db_handler import AttendanceHandler
+from private import TELEGRAM_TOKEN
 import os
 
-import sys
-sys.path.insert(0, '/Users/Joen/Documents/COS-CM-BOT/secret')
 
-try:
-    print("using environment variables")
-    TELEGRAM_TOKEN = os.environ["API_TELEGRAM_TOKEN"]
-except:
-    import keys  
-    print("moving on to secrets")
-    TELEGRAM_TOKEN = keys.TEST_TELEGRAM_KEY
 
-#attd = AttendanceHandler()
 
 def start_msg(update, context):
     chat_id = update.message.from_user["id"]
@@ -45,8 +36,15 @@ def attd_date_msg(update, context):
     get_chat_id = update.message.from_user["id"]
     update.message.reply_text(message_text["attendance_pending"])
     DATE_TODAY,DATE_TODAY_SLASHED = give_sun_date_if_not_sun()
+    reply_markup={}
     user_session = get_user_session_code(str(get_chat_id))
-    reply_markup= attd.get_attendance(user_session+DATE_TODAY)
+    is_available = get_attd_obj_by_id(user_session + DATE_TODAY)
+    if is_available == False:
+        init_obj = init_name_mapped_val(user_session)
+        reply_markup = create_inline_obj(init_obj)
+        add_in_new_attd(user_session+DATE_TODAY, str(init_obj))
+    else:
+        reply_markup = create_inline_obj(get_attd_obj_by_id(user_session+DATE_TODAY))
     whole_message = message_text["attendance_message"] + DATE_TODAY_SLASHED + message_text["attendance_caution"]
     context.bot.send_message(chat_id = get_chat_id, text=whole_message, reply_markup = reply_markup)
 
@@ -55,10 +53,13 @@ def update_attd(update, context):
     get_chat_id = update.callback_query.message.chat.id
     DATE_TODAY,DATE_TODAY_SLASHED = give_sun_date_if_not_sun()
     user_session = get_user_session_code(str(get_chat_id))
-    data = query.data.strip().replace("attd_","").replace("submit_attd","").replace("change_attd","")
-    new_markup = attd.update_attendance_name(data, user_session + DATE_TODAY)
+    obj = get_attd_obj_by_id(user_session+DATE_TODAY)
+    button_pressed =  query.data.strip()
+    new_mapped_val = update_name_mapped_val(button_pressed, obj)
+    new_markup = create_inline_obj(new_mapped_val)
     whole_message = message_text["attendance_message"] + DATE_TODAY_SLASHED+ message_text["attendance_caution"]
     context.bot.edit_message_text(chat_id=get_chat_id, message_id=query.message.message_id, text=whole_message, reply_markup=new_markup)
+    add_in_new_attd(user_session+DATE_TODAY, str(new_mapped_val))
 
 def submit_attd(update, context):
     get_chat_id = update.callback_query.message.chat.id
