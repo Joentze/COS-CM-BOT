@@ -89,7 +89,7 @@ class PostgresHandler:
         SELECT name FROM all_kids
         WHERE session_code = %(session_code)s 
         AND
-        date = %(date)s
+        last_update = %(date)s
         """,
         {
             "session_code":session_code,
@@ -103,7 +103,7 @@ class PostgresHandler:
             self.c.execute(
                 """
                 UPDATE all_kids
-                SET date = %(date)s
+                SET last_update = %(date)s
                 WHERE session_code = %(session_code)s
                 """,
                 {

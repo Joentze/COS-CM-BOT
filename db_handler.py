@@ -15,7 +15,7 @@ class AttendanceHandler:
             obj = self.red.r.get(attd_id)
             return create_inline_obj(json.loads(obj))
         else:
-            return create_inline_obj(json.loads(self.add_attendance(attd_id)))
+            return create_inline_obj(self.add_attendance(attd_id))
 
     #adds attendance for sunday
     def add_attendance(self, attd_id):
@@ -41,9 +41,9 @@ class AttendanceHandler:
         curr_obj = json.loads(self.red.r.get(attd_id))
         if curr_obj[name] < 2:
             curr_obj[name] += 1
-        elif curr_obj[name] == 0:
+        elif curr_obj[name] == 2:
             curr_obj[name] = 0
-        self.red.set(attd_id, json.dumps(curr_obj))
+        self.red.r.set(attd_id, json.dumps(curr_obj))
         return self.create_inline_object(curr_obj)
 
     #adds name of kid to attendance
@@ -82,6 +82,7 @@ class AttendanceHandler:
                 elif v > 0:
                     absentee_obj[k] = 0
             self.red.r.set(absent_id, json.dumps(absentee_obj))
+            self.pg.update_date(attd_id[:4], attd_id[-8:])
         else:
             self.add_absentee_cnt(attd_id)
             self.pg.update_date(attd_id[:4], attd_id[-8:])

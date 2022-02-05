@@ -6,7 +6,7 @@ from excel_auto import init_workbook
 from datetime import datetime, timedelta, time
 from msg import message_text, inline_options, month_number_map
 from random_verse import get_random_verse
-#from db_handler import AttendanceHandler
+from db_handler import AttendanceHandler
 import os
 
 import sys
@@ -20,7 +20,7 @@ except:
     print("moving on to secrets")
     TELEGRAM_TOKEN = keys.TEST_TELEGRAM_KEY
 
-#attd = AttendanceHandler()
+attd = AttendanceHandler()
 
 def start_msg(update, context):
     chat_id = update.message.from_user["id"]
@@ -66,11 +66,9 @@ def submit_attd(update, context):
     DATE_TODAY,DATE_TODAY_SLASHED = give_sun_date_if_not_sun()
     attd_id = user_session+DATE_TODAY
     query = update.callback_query
-    mapped_val = get_attd_obj_by_id(attd_id)
-    add_in_new_attd(attd_id, str(mapped_val))
     new_changes_markup = {'inline_keyboard':[[{'callback_data':'change_attd', 'text':'Make Changes 📋'}]]}
-    collate_absentee_cnt(DATE_TODAY, user_session, mapped_val)
     context.bot.edit_message_text(chat_id=get_chat_id, message_id=query.message.message_id, text=message_text["attendance_submit"], reply_markup=new_changes_markup)
+    attd.update_absentee_cnt(attd_id)
 
 def change_attd(update, context):
     get_chat_id = update.callback_query.message.chat.id
@@ -78,8 +76,7 @@ def change_attd(update, context):
     DATE_TODAY,DATE_TODAY_SLASHED = give_sun_date_if_not_sun()
     attd_id = user_session+DATE_TODAY
     query = update.callback_query
-    obj = get_attd_obj_by_id(attd_id)
-    markup_obj = create_inline_obj(obj)
+    markup_obj = attd.get_attendance(user_session + DATE_TODAY)
     whole_message = message_text["attendance_message"] + DATE_TODAY_SLASHED
     context.bot.edit_message_text(chat_id=get_chat_id, message_id=query.message.message_id,text=whole_message,  reply_markup=markup_obj)
     
