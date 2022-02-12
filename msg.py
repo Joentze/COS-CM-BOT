@@ -19,6 +19,7 @@ message_text = {
     "addkid_error":"/addkid command formatting is off. Please try again.",
     "added_kid_success":"🎉 Sucessfully added kid into ",
     "date_format_error":"The date format that you have entered is incorrect. Ensure that the date is in MM/YYYY format 📆",
+    "attendance_reminder":"Good morning teachers 🌥 Gentle reminder to take /attendance today! Have a blessed Sunday 😇",
     "help_message":"""
     List of Commands:
 
@@ -28,6 +29,7 @@ Misc. Stuff:
 
 Work Stuff:
 /attendance - Sends the attendance for the class of session stated in your profile 📋
+/absentee - Shows kids that have been absent for more than 2 weeks 🚩
 /collate MM/YYYY - Collates attendance for the week and sends an excel file.
 
 🤔Change to other classes (via /setclass) to change their attendance
@@ -112,3 +114,4 @@ class_level_up = {
     "P3":"P4",
     "P5":"P6"
 }
+all_session_codes=["FPP6","FPP5","FPP4","FPP3","FJP2","FJP1","FJK2","FJK1","FJN1","FTN0","SPP6","SPP5","SPP4","SPP3","SJP2","SJP1","SJK2","SJK1","SJN1","STN0"]

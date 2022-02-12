@@ -1,11 +1,9 @@
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackQueryHandler
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackQueryHandler, JobQueue
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton
-from attendance_handler import create_inline_obj, init_name_mapped_val, update_name_mapped_val, attd_insert_new_kid,add_in_new_attd, get_attd_obj_by_id, inside_bool_db,startup_user,get_user_readable_data,insert_class_user, insert_session_user,insert_session_id_user,get_user_session_code, insert_new_kid, get_praise_jam_attendance_array
+from attendance_handler import create_inline_obj, get_all_chat_id, init_name_mapped_val, update_name_mapped_val, attd_insert_new_kid,add_in_new_attd, get_attd_obj_by_id, inside_bool_db,startup_user,get_user_readable_data,insert_class_user, insert_session_user,insert_session_id_user,get_user_session_code, insert_new_kid, get_praise_jam_attendance_array, collate_absentee_cnt, get_names_absentee_cnt, get_all_chat_id
 from excel_auto import init_workbook
  #attd_change_inline_button
-import time
-from datetime import datetime, timedelta
-import logging
+from datetime import datetime, timedelta, time
 from msg import message_text, inline_options, month_number_map
 from private import TELEGRAM_TOKEN
 from random_verse import get_random_verse
@@ -14,8 +12,6 @@ import os
 
 
 
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 def start_msg(update, context):
     chat_id = update.message.from_user["id"]
@@ -69,6 +65,7 @@ def submit_attd(update, context):
     mapped_val = get_attd_obj_by_id(attd_id)
     add_in_new_attd(attd_id, str(mapped_val))
     new_changes_markup = {'inline_keyboard':[[{'callback_data':'change_attd', 'text':'Make Changes 📋'}]]}
+    collate_absentee_cnt(DATE_TODAY, user_session, mapped_val)
     context.bot.edit_message_text(chat_id=get_chat_id, message_id=query.message.message_id, text=message_text["attendance_submit"], reply_markup=new_changes_markup)
 
 def change_attd(update, context):
@@ -152,12 +149,15 @@ def add_kid_into_attd(update, context):
         if len(session_code) != 4:
             update.message.reply_text(message_text["addkid_error"])
         elif len(session_code) == 4:
-            session = session_code[0:2]
-            kid_class = session_code[2:4]
-            DATE_TODAY,DATE_TODAY_SLASHED = give_sun_date_if_not_sun()
-            insert_new_kid({"name":name.strip(),"session_code":session_code,"age":00,"session":session,"class":kid_class})
-            attd_insert_new_kid(name.strip(), session_code + DATE_TODAY)            
-            update.message.reply_text(message_text["added_kid_success"] + message_text[session] + " " + kid_class)
+            try:
+                session = session_code[0:2]
+                kid_class = session_code[2:4]
+                DATE_TODAY,DATE_TODAY_SLASHED = give_sun_date_if_not_sun()
+                insert_new_kid({"name":name.strip(),"session_code":session_code,"session":session,"class":kid_class,"age":00, "attendance_cnt":0})
+                attd_insert_new_kid(name.strip(), session_code + DATE_TODAY)            
+                update.message.reply_text(message_text["added_kid_success"] + message_text[session] + " " + kid_class)
+            except:
+                update.message.reply_text(message_text["addkid_error"])        
     else:
         update.message.reply_text(message_text["addkid_error"])
 
@@ -185,11 +185,27 @@ def collate_attendance_month(update, context):
     else:
         update.message.reply_text(message_text["date_format_error"]) 
 
+def get_absentee_red_flags(update, context):
+    chat_id = update.message.from_user["id"]
+    user_session = get_user_session_code(str(chat_id))
+    name_list = get_names_absentee_cnt(user_session)
+    message = f"List shows kids that have been absent for more than 3 weeks 🥶:\n\n{name_list}"
+    update.message.reply_text(message) 
 
+def send_all_reminder_msg(context):
+    all_chat_ids = get_all_chat_id()
+    for chat_id in all_chat_ids:
+        try:
+            context.bot.send_message(chat_id=chat_id[0], text=message_text['attendance_reminder'])
+        except:
+            pass
 
-
-
-
+def scheduler(dp):
+    job_queue = JobQueue()
+    job_queue.set_dispatcher(dp)
+    this_time = time(2, 30, 00, 00000)
+    job_queue.run_daily(callback=send_all_reminder_msg, time= this_time, days=(6,))
+    job_queue.start()
 
 def run():
     updater = Updater(TELEGRAM_TOKEN)
@@ -201,6 +217,7 @@ def run():
     dp.add_handler(CommandHandler('setclass',update_profile))
     dp.add_handler(CommandHandler('attendance', attd_date_msg))
     dp.add_handler(CommandHandler('verse', getverse))
+    dp.add_handler(CommandHandler('absentee', get_absentee_red_flags))
     dp.add_handler(CommandHandler('addkid', add_kid_into_attd))
     dp.add_handler(CommandHandler('collate', collate_attendance_month))
     dp.add_handler(CallbackQueryHandler(update_attd,pattern="attd_"))
@@ -210,6 +227,7 @@ def run():
     dp.add_handler(CallbackQueryHandler(J_submit_user_session_data,pattern="submit_user_session_data_J"))
     dp.add_handler(CallbackQueryHandler(T_submit_user_session_data,pattern="submit_user_session_data_T"))
     dp.add_handler(CallbackQueryHandler(submit_user_class_data,pattern="submit_user_class_data_"))
+    scheduler(dp)
     updater.start_polling()
     updater.idle()
 

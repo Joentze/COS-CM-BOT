@@ -2,11 +2,10 @@
 from datetime import date, timedelta
 import json 
 import ast
-import psycopg2 as sql
-from private import HEROKU_URI
+#from private import HEROKU_URI
 import csv
-
-
+import psycopg2 as sql
+import msg as message
 def create_inline_obj(mapped_val):
     emoji_list = {0:'Absent ❌',1:' Church ⛪️',2:'Zoom 👩🏻‍💻'}
     inline_array = []
@@ -22,6 +21,77 @@ def update_name_mapped_val(data, mapped_val):
     elif mapped_val[data] == 2:
         mapped_val[data] = 0
     return mapped_val
+
+def update_absentee_cnt(date, data, session_code, curr_cnt):
+    #curr_cnt = mapped_val[data]
+    if curr_cnt==0:
+        c.execute("""SELECT absentee_cnt FROM all_kids
+                    WHERE name = %(name)s AND session_code = %(session_code)s""",
+                    {"name":data, "session_code":session_code})
+        set_cnt = c.fetchone()[0]
+        with conn:
+            if add_last_update(data, session_code, date):
+                c.execute(
+                    """
+                    UPDATE all_kids
+                    SET absentee_cnt = %(set_cnt)s
+                    WHERE name = %(name)s AND session_code = %(session_code)s
+                    """,
+                    {"name":data, "session_code":session_code, "set_cnt":set_cnt+1}
+                )
+    elif curr_cnt > 0:
+        with conn:
+            c.execute(
+                """
+                UPDATE all_kids
+                SET absentee_cnt = 0
+                WHERE name = %(name)s AND session_code = %(session_code)s
+                """,
+                {"name":data, "session_code":session_code}
+            )
+
+#updates last update column in ddmmyyyy format in string
+def add_last_update(data, session_code, date):
+    
+    c.execute("""
+    SELECT last_update FROM all_kids
+    WHERE name = %(name)s AND session_code = %(session_code)s
+    """,
+    {"name":data, "session_code":session_code})
+    get_last_update_date = c.fetchone()[0]
+    if get_last_update_date == date:
+        print("date is updated")
+        return False
+    else:
+        print("date is not updated")
+        c.execute("""
+        UPDATE all_kids
+        SET last_update = %(last_update)s
+        WHERE name = %(name)s AND session_code = %(session_code)s
+        """,
+        {"name":data, "session_code":session_code, "last_update":date})
+        return True
+
+def get_names_absentee_cnt(session_code):
+    with conn:
+        c.execute("""
+        SELECT name, absentee_cnt
+        FROM all_kids
+        WHERE session_code = %(session_code)s AND absentee_cnt > 2
+        """,
+        {"session_code":session_code}
+        )
+        return_set = []
+        for name, cnt in c.fetchall():
+            this_line = f"{name}: 🚩 X {cnt}"
+            return_set.append(this_line)
+        return '\n'.join(return_set)
+
+
+def collate_absentee_cnt(date, session_code, mapped_val):
+    for name, attendance_state in mapped_val.items():
+        print(f'updating {name}')
+        update_absentee_cnt(date, name, session_code, attendance_state)
 
 def init_name_mapped_val(class_id):
     return_dict = {}
@@ -39,8 +109,8 @@ def attd_insert_new_kid(name, attd_id):
         obj_state[name.strip()] = 1
         add_in_new_attd(attd_id, str(obj_state))
 
-conn = sql.connect(HEROKU_URI, sslmode='require')
-
+#conn = sql.connect(HEROKU_URI, sslmode='require')
+conn = sql.connect("postgres://rtdzucgprdiqjl:627a98ca7ea1da64f8dc869da0af65a5b49cf27242294be1e83ebbbf23cc475d@ec2-18-211-194-36.compute-1.amazonaws.com:5432/dafbp8vq34ktqn", sslmode='require')
 c = conn.cursor()
 #
 #c.execute("""CREATE TABLE users (
@@ -143,7 +213,6 @@ def insert_new_kid(obj):
         INSERT INTO all_kids VALUES (
             %(name)s,
             %(session_code)s,
-            %(age)s,
             %(session)s,
             %(class)s
         )
@@ -241,7 +310,7 @@ def create_array_of_user_obj(csvname):
         for line in reader:
             line = line[0].split(',')
             print(line)
-            this_obj = {"name":line[3].strip(),"session_code":line[0]+line[1]+line[2],"age":00,"session":line[0]+line[1],"class":line[2]}
+            this_obj = {"name":line[3].strip(),"session_code":line[0]+line[1]+line[2],"session":line[0]+line[1],"class":line[2]}
             return_list.append(this_obj)
     return return_list
 
@@ -327,7 +396,78 @@ def get_praise_jam_attendance_array(month, year):
     tots_age_group = get_age_group_total_obj("T", date_obj)
     return {"P":praise_age_group, "J":jam_age_group, "T":tots_age_group}
 
+descending_class_conversion_map = {
+    "P6":"TC",
+    "P5":"P6",
+    "P4":"P5",
+    "P3":"P4",
+    "P2":"P3",
+    "P1":"P2",
+    "K2":"P1",
+    "K1":"K2",
+    "N1":"K1",
+    "N0":"N1",
+}
+
+undo_class_conversion_map ={
+    "TC":"P6",
+    "P6":"P5",
+    "P5":"P4",
+    "P4":"P3",
+    "P3":"P2",
+    "P2":"P1",
+    "P1":"K2",
+    "K2":"K1",
+    "K1":"N1",
+    "N1":"N0",
+}
+
+def update_all_kids_classes(conversion_map, all_session_codes):
+    for class_now, class_next in conversion_map.items():
+        with conn:
+            print(f'replaced {class_now}')
+            c.execute("""
+            UPDATE all_kids SET class = %(class_next)s WHERE class = %(class_now)s""",
+            {"class_now":class_now, "class_next":class_next}
+            )
+    for session_code in all_session_codes:
+        with conn:
+            print(f'updating session code: {session_code}')
+            c.execute("""
+                UPDATE all_kids
+                SET session_code = %(session_code_next)s
+                WHERE session_code = %(session_code_now)s
+            """,
+            {"session_code_next":session_code[0:2]+conversion_map[session_code[-2:]], "session_code_now":session_code})
+    
+#RESETS ALL CLASS
+
+def change_class_from_session_code(all_session_codes):
+    for session_code in all_session_codes:
+        print(session_code)
+        with conn:
+            print(session_code[-2:])
+            c.execute("""
+            UPDATE all_kids
+            SET class = %(class)s
+            WHERE session_code = %(session_code)s
+            """,{
+                "session_code":session_code,
+                "class":session_code[-2:]
+            })
+
+def get_all_chat_id():
+    c.execute("SELECT chat_id FROM users")
+    get_all_names_chat_id = c.fetchall()
+    return get_all_names_chat_id
+
+def write_raw_sql(query_string):
+    with conn:
+        c.execute(query_string)
+
 if __name__ == "__main__":
+    #update_all_kids_classes(undo_class_conversion_map, message.all_session_codes)
+    #update_all_kids_classes(conversion_map)
     #print(get_attd_count_month("FP","102021"))
     #date_obj = get_attd_id_combis("10","2021")
     #print(get_age_group_total_obj("P", date_obj))
@@ -339,4 +479,9 @@ if __name__ == "__main__":
     #with conn:
     #    c.execute("UPDATE all_kids SET session")
     #
+    #update_all_kids_classes(descending_conversion_map)
+    #change_class_from_session_code(message.all_session_codes)
+    write_raw_sql("""UPDATE all_kids SET absentee_cnt = 0""")
+    #update_absentee_cnt("25122021","Levi Ow Yong", "FTN0",2)
+    #print(get_names_absentee_cnt("FPP4"))
     pass
