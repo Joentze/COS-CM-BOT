@@ -86,6 +86,13 @@ class AttendanceHandler:
         else:
             self.add_absentee_cnt(attd_id)
             self.pg.update_date(attd_id[:4], attd_id[-8:])
+    
+    def get_session_id(self, chat_id):
+        session_id = self.red.r.get(str(chat_id))
+        if session_id == None:
+            session_id = self.pg.get_session_id(chat_id)
+            self.red.r.set(chat_id, session_id)
+        return session_id
 
 if __name__ == "__main__":
     test = AttendanceHandler()

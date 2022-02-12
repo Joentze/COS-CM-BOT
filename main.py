@@ -22,17 +22,19 @@ except:
 
 attd = AttendanceHandler()
 
+#=====================================================
+
 def start_msg(update, context):
     chat_id = update.message.from_user["id"]
     user_name = update.message.from_user["first_name"]
     is_id_in_db = inside_bool_db(chat_id)
     if is_id_in_db == False:
         update.message.reply_text(message_text["start"])
-        startup_user(chat_id, user_name)
+        attd.pg.startup_user(chat_id, user_name)
         update_profile(update, context)
     elif is_id_in_db == True:
         update.message.reply_text(message_text["welcome_back_start"])
-        name, session, user_class = get_user_readable_data(chat_id)
+        name, session, user_class = attd.pg.get_user_data(chat_id)
         data_checking_string = f"NAME: {name}\nCLASS: {user_class}\nSESSION: {message_text[session]}"
         update.message.reply_text(data_checking_string)
 
@@ -49,6 +51,8 @@ def attd_date_msg(update, context):
     reply_markup= attd.get_attendance(user_session+DATE_TODAY)
     whole_message = message_text["attendance_message"] + DATE_TODAY_SLASHED + message_text["attendance_caution"]
     context.bot.send_message(chat_id = get_chat_id, text=whole_message, reply_markup = reply_markup)
+
+#=====================================================
 
 def update_attd(update, context):
     query = update.callback_query
@@ -80,6 +84,8 @@ def change_attd(update, context):
     whole_message = message_text["attendance_message"] + DATE_TODAY_SLASHED
     context.bot.edit_message_text(chat_id=get_chat_id, message_id=query.message.message_id,text=whole_message,  reply_markup=markup_obj)
     
+#=====================================================
+
 def P_submit_user_session_data(update, context):
     get_chat_id = update.callback_query.message.chat.id
     message_id = update.callback_query.message.message_id
@@ -101,7 +107,7 @@ def T_submit_user_session_data(update, context):
     insert_session_user(str(get_chat_id), session)
     context.bot.edit_message_text(chat_id=get_chat_id, message_id=message_id, text=message_text['select_class'], reply_markup=inline_options["T_class_option"])
 
-
+# when inline keyboard class button pressed, set session ID
 def submit_user_class_data(update, context):
     get_chat_id = update.callback_query.message.chat.id
     message_id = update.callback_query.message.message_id
@@ -112,9 +118,12 @@ def submit_user_class_data(update, context):
     insert_session_id_user(str_chat_id, session_id)
     context.bot.edit_message_text(chat_id=get_chat_id, message_id=message_id, text=message_text["select_complete"])
 
+# for /setclass command
 def update_profile(update, context):
     chat_id = update.message.from_user["id"]
     context.bot.send_message(chat_id = chat_id, text=message_text["select_session"], reply_markup = inline_options["session_option"])
+
+#=====================================================
 
 def help_msg(update, context):
     update.message.reply_text(message_text["help_message"])
@@ -154,7 +163,16 @@ def add_kid_into_attd(update, context):
                 session = session_code[0:2]
                 kid_class = session_code[2:4]
                 DATE_TODAY,DATE_TODAY_SLASHED = give_sun_date_if_not_sun()
-                insert_new_kid({"name":name.strip(),"session_code":session_code,"session":session,"class":kid_class,"age":00, "attendance_cnt":0})
+                insert_new_kid(
+                    {
+                        "name":name.strip(),
+                        "session_code":session_code,
+                        "session":session,
+                        "class":kid_class,
+                        "age":00,
+                        "attendance_cnt":0
+                    }
+                    )
                 attd_insert_new_kid(name.strip(), session_code + DATE_TODAY)            
                 update.message.reply_text(message_text["added_kid_success"] + message_text[session] + " " + kid_class)
             except:
@@ -185,6 +203,8 @@ def collate_attendance_month(update, context):
             update.message.reply_text(message_text["date_format_error"]) 
     else:
         update.message.reply_text(message_text["date_format_error"]) 
+
+#=====================================================
 
 def get_absentee_red_flags(update, context):
     chat_id = update.message.from_user["id"]
@@ -223,6 +243,7 @@ def get_date_attendance(update, context):
             return_string.append(f'{name}-->{state_obj[number]}')
         update.message.reply_text('\n'.join(return_string))
 
+#=====================================================
 
 def run():
     updater = Updater(TELEGRAM_TOKEN)

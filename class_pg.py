@@ -111,6 +111,55 @@ class PostgresHandler:
                     "session_code":session_code
                 }
                 )
+    def startup_user(self, chat_id, user_name):    
+        with self.conn:
+            self.c.execute(
+                """
+                INSERT INTO users 
+                (name, chat_id) 
+                VALUES (%(user_name)s, %(chat_id)s)
+                """,
+                {"user_name":user_name,"chat_id":chat_id}
+                )
+
+    def delete_user(self, chat_id):
+        with self.comm:
+            self.c.execute (
+                """
+                DELETE FROM users
+                WHERE chat_id = %(chat_id)s
+                """,
+                {
+                    "chat_id":chat_id,
+                }
+            )
+    def get_session_id(self, chat_id):
+        self.c.execute(
+        """
+        SELECT session_id 
+        FROM users
+        WHERE chat_id = %(chat_id)s
+        """,
+        {
+            "chat_id":chat_id
+        }
+        )
+        return self.c.fetchone()[0]
+
+    def get_user_data(self, chat_id): 
+        get_read_tuple = self.c.execute(
+        """
+        SELECT name, session, class
+        FROM 
+        users WHERE chat_id = %(chat_id)s
+        """, 
+        {
+            "chat_id":str(chat_id)
+        }
+        )
+        get_read_tuple = self.c.fetchone()
+        return get_read_tuple[0], get_read_tuple[1], get_read_tuple[2]
+
         
 if __name__ == "__main__":
     pg =  PostgresHandler()
