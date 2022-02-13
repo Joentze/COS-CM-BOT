@@ -44,13 +44,13 @@ def stop_bot(update, context):
     delete_user_from_attd(chat_id)
 
 def attd_date_msg(update, context):
-    get_chat_id = update.message.from_user["id"]
+    chat_id = update.message.from_user["id"]
     update.message.reply_text(message_text["attendance_pending"])
     DATE_TODAY,DATE_TODAY_SLASHED = give_sun_date_if_not_sun()
-    user_session = get_user_session_code(str(get_chat_id))
+    user_session = attd.get_session_id(chat_id)
     reply_markup= attd.get_attendance(user_session+DATE_TODAY)
     whole_message = message_text["attendance_message"] + DATE_TODAY_SLASHED + message_text["attendance_caution"]
-    context.bot.send_message(chat_id = get_chat_id, text=whole_message, reply_markup = reply_markup)
+    context.bot.send_message(chat_id = chat_id, text=whole_message, reply_markup = reply_markup)
 
 #=====================================================
 
@@ -65,24 +65,23 @@ def update_attd(update, context):
     context.bot.edit_message_text(chat_id=get_chat_id, message_id=query.message.message_id, text=whole_message, reply_markup=new_markup)
 
 def submit_attd(update, context):
-    get_chat_id = update.callback_query.message.chat.id
-    user_session = get_user_session_code(str(get_chat_id))
+    chat_id = update.callback_query.message.chat.id
+    user_session = attd.get_session_id(chat_id)
     DATE_TODAY,DATE_TODAY_SLASHED = give_sun_date_if_not_sun()
     attd_id = user_session+DATE_TODAY
     query = update.callback_query
     new_changes_markup = {'inline_keyboard':[[{'callback_data':'change_attd', 'text':'Make Changes 📋'}]]}
-    context.bot.edit_message_text(chat_id=get_chat_id, message_id=query.message.message_id, text=message_text["attendance_submit"], reply_markup=new_changes_markup)
+    context.bot.edit_message_text(chat_id=chat_id, message_id=query.message.message_id, text=message_text["attendance_submit"], reply_markup=new_changes_markup)
     attd.update_absentee_cnt(attd_id)
 
 def change_attd(update, context):
-    get_chat_id = update.callback_query.message.chat.id
-    user_session = get_user_session_code(str(get_chat_id))
+    chat_id = update.callback_query.message.chat.id
+    user_session = attd.get_session_id(chat_id)
     DATE_TODAY,DATE_TODAY_SLASHED = give_sun_date_if_not_sun()
-    attd_id = user_session+DATE_TODAY
     query = update.callback_query
     markup_obj = attd.get_attendance(user_session + DATE_TODAY)
     whole_message = message_text["attendance_message"] + DATE_TODAY_SLASHED
-    context.bot.edit_message_text(chat_id=get_chat_id, message_id=query.message.message_id,text=whole_message,  reply_markup=markup_obj)
+    context.bot.edit_message_text(chat_id=chat_id, message_id=query.message.message_id,text=whole_message,  reply_markup=markup_obj)
     
 #=====================================================
 
@@ -208,7 +207,7 @@ def collate_attendance_month(update, context):
 
 def get_absentee_red_flags(update, context):
     chat_id = update.message.from_user["id"]
-    user_session = get_user_session_code(str(chat_id))
+    user_session = attd.get_session_id(chat_id)
     name_list = get_names_absentee_cnt(user_session)
     message = f"List shows kids that have been absent for more than 3 weeks 🥶:\n\n{name_list}"
     update.message.reply_text(message) 
@@ -230,7 +229,7 @@ def scheduler(dp):
 
 def get_date_attendance(update, context):
     chat_id = update.message.from_user["id"]
-    user_session = get_user_session_code(str(chat_id))
+    user_session = attd.get_session_id(chat_id)
     message = update.message.text
     date_input = message.replace("/getattd","").strip().replace('/','')
     attd_obj = get_attd_obj_by_id(user_session+date_input)
