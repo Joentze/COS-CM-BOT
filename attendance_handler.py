@@ -6,6 +6,20 @@ import ast
 import csv
 import psycopg2 as sql
 import msg as message
+import os
+import sys
+sys.path.insert(0, '/Users/Joen/Documents/COS-CM-BOT/secret')
+
+
+try:
+    print("using environment variables")
+    HEROKU_CRED = os.environ["HEROKU_POSTGRES_CREDENTIALS"]
+except:
+    import secret.keys as keys
+    print("moving on to secrets")
+    HEROKU_CRED = keys.PG_HEROKU_KEY
+
+
 def create_inline_obj(mapped_val):
     emoji_list = {0:'Absent ❌',1:' Church ⛪️',2:'Zoom 👩🏻‍💻'}
     inline_array = []
@@ -109,8 +123,9 @@ def attd_insert_new_kid(name, attd_id):
         obj_state[name.strip()] = 1
         add_in_new_attd(attd_id, str(obj_state))
 
-#conn = sql.connect(HEROKU_URI, sslmode='require')
-conn = sql.connect("postgres://rtdzucgprdiqjl:627a98ca7ea1da64f8dc869da0af65a5b49cf27242294be1e83ebbbf23cc475d@ec2-18-211-194-36.compute-1.amazonaws.com:5432/dafbp8vq34ktqn", sslmode='require')
+conn = sql.connect(HEROKU_CRED, sslmode='require')
+
+
 c = conn.cursor()
 #
 #c.execute("""CREATE TABLE users (
@@ -461,12 +476,23 @@ def get_all_chat_id():
     get_all_names_chat_id = c.fetchall()
     return get_all_names_chat_id
 
+
+def delete_user_from_attd(chat_id):
+    with conn:
+        c.execute("""
+        DELETE FROM users 
+        WHERE chat_id = %(chat_id)s
+        """, 
+        {"chat_id":str(chat_id)}
+        )
+
 def write_raw_sql(query_string):
     with conn:
         c.execute(query_string)
 
+
 if __name__ == "__main__":
-    #update_all_kids_classes(undo_class_conversion_map, message.all_session_codes)
+    #update_all_kids_classes(descending_class_conversion_map, message.all_session_codes)
     #update_all_kids_classes(conversion_map)
     #print(get_attd_count_month("FP","102021"))
     #date_obj = get_attd_id_combis("10","2021")
@@ -481,7 +507,7 @@ if __name__ == "__main__":
     #
     #update_all_kids_classes(descending_conversion_map)
     #change_class_from_session_code(message.all_session_codes)
-    write_raw_sql("""UPDATE all_kids SET absentee_cnt = 0""")
+
+    #print(write_raw_sql("""SELECT * FROM all_attd WHERE attd_id LIKE '________2021'"""))
     #update_absentee_cnt("25122021","Levi Ow Yong", "FTN0",2)
-    #print(get_names_absentee_cnt("FPP4"))
     pass

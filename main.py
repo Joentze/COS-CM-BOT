@@ -1,6 +1,6 @@
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackQueryHandler, JobQueue
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton
-from attendance_handler import create_inline_obj, get_all_chat_id, init_name_mapped_val, update_name_mapped_val, attd_insert_new_kid,add_in_new_attd, get_attd_obj_by_id, inside_bool_db,startup_user,get_user_readable_data,insert_class_user, insert_session_user,insert_session_id_user,get_user_session_code, insert_new_kid, get_praise_jam_attendance_array, collate_absentee_cnt, get_names_absentee_cnt, get_all_chat_id
+from attendance_handler import create_inline_obj, delete_user_from_attd, get_all_chat_id, init_name_mapped_val, update_name_mapped_val, attd_insert_new_kid,add_in_new_attd, get_attd_obj_by_id, inside_bool_db,startup_user,get_user_readable_data,insert_class_user, insert_session_user,insert_session_id_user,get_user_session_code, insert_new_kid, get_praise_jam_attendance_array, collate_absentee_cnt, get_names_absentee_cnt, get_all_chat_id, delete_user_from_attd
 from excel_auto import init_workbook
  #attd_change_inline_button
 from datetime import datetime, timedelta, time
@@ -26,6 +26,11 @@ def start_msg(update, context):
         name, session, user_class = get_user_readable_data(chat_id)
         data_checking_string = f"NAME: {name}\nCLASS: {user_class}\nSESSION: {message_text[session]}"
         update.message.reply_text(data_checking_string)
+
+def stop_bot(update, context):
+    chat_id = update.message.from_user["id"]
+    update.message.reply_text("Stopping Bot...")
+    delete_user_from_attd(chat_id)
 
 def attd_date_msg(update, context):
     get_chat_id = update.message.from_user["id"]
@@ -208,10 +213,27 @@ def scheduler(dp):
     job_queue.run_daily(callback=send_all_reminder_msg, time= this_time, days=(6,))
     job_queue.start()
 
+def get_date_attendance(update, context):
+    chat_id = update.message.from_user["id"]
+    user_session = get_user_session_code(str(chat_id))
+    message = update.message.text
+    date_input = message.replace("/getattd","").strip().replace('/','')
+    attd_obj = get_attd_obj_by_id(user_session+date_input)
+    if attd_obj == False:
+        update.message.reply_text("This date is not available")
+    else:
+        return_string = []
+        state_obj = {0:'Absent', 1:'Church', 2:'Zoom'}
+        for name, number in attd_obj.items():
+            return_string.append(f'{name}-->{state_obj[number]}')
+        update.message.reply_text('\n'.join(return_string))
+
+
 def run():
     updater = Updater(TELEGRAM_TOKEN)
     dp = updater.dispatcher
     dp.add_handler(CommandHandler('start',start_msg))
+    dp.add_handler(CommandHandler('stop',stop_bot))
     dp.add_handler(CommandHandler('timetest',get_time_test))
     dp.add_handler(CommandHandler('help',help_msg))
     dp.add_handler(CommandHandler('advancehelp',advance_help_msg))
@@ -221,6 +243,7 @@ def run():
     dp.add_handler(CommandHandler('absentee', get_absentee_red_flags))
     dp.add_handler(CommandHandler('addkid', add_kid_into_attd))
     dp.add_handler(CommandHandler('collate', collate_attendance_month))
+    dp.add_handler(CommandHandler('getattd', get_date_attendance))
     dp.add_handler(CallbackQueryHandler(update_attd,pattern="attd_"))
     dp.add_handler(CallbackQueryHandler(submit_attd,pattern="submit_attd"))
     dp.add_handler(CallbackQueryHandler(change_attd,pattern="change_attd"))
